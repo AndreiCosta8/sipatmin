@@ -197,6 +197,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-w
 .inp-room-code{letter-spacing:2px;font-weight:700;font-size:15px;text-transform:uppercase;border-color:rgba(245,196,24,.5)!important;background:#fffbf0}
 .inp-room-code:focus{border-color:var(--gold)!important;box-shadow:0 0 0 3px rgba(245,196,24,.15)!important}
 .room-code-hint{font-size:10px;color:var(--muted);margin-top:3px;text-align:center}
+
+/* ── CONFETTI JOGADOR ──────── */
+.confetti-jog{position:fixed;inset:0;pointer-events:none;z-index:9000;overflow:hidden}
+.conf-j{position:absolute;top:-20px;animation:confJ linear infinite}
+@keyframes confJ{0%{transform:translateY(0) rotate(0deg);opacity:1}90%{opacity:1}100%{transform:translateY(105vh) rotate(540deg);opacity:0}}
+/* ── RESULT SCREEN ─────────── */
+.res-trophy{font-size:72px;display:block;text-align:center;animation:trophyPop .7s cubic-bezier(.17,.89,.32,1.28)}
+@keyframes trophyPop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+.res-pos{font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;color:var(--navy);line-height:1;text-align:center;animation:posSlide .6s .2s cubic-bezier(.17,.89,.32,1.28) both}
+@keyframes posSlide{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.res-pos.winner{color:var(--gold);text-shadow:0 0 30px rgba(245,196,24,.4)}
+.res-item.me{background:rgba(245,196,24,.1);border-radius:8px;padding:8px 10px;margin:0 -8px}
+/* ── ROOM CODE INPUT ──────── */
+.inp-room-code{letter-spacing:2px;font-weight:700;font-size:15px;text-transform:uppercase}
+.inp-room-code:focus{border-color:var(--gold)!important}
+.room-code-hint{font-size:10px;color:var(--muted);margin-top:3px;text-align:center}
+
 </style>
 </head>
 <body>
@@ -229,7 +246,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-w
     <div class="lob-logo-sub">LUVAS ESPECIAIS</div>
   </div>
     <h1 class="lob-h"><em>SIPATMIN</em> Quiz EPI</h1>
-    <p class="lob-sub">Uniluvas SIPATMIN 2026 · Identifique o EPI certo e ganhe pontos por acerto e velocidade!</p>
+    <p class="lob-sub">Uniluvas SIPATMIN 2026 · Teste seu conhecimento sobre EPIs. Responda rápido — quanto mais veloz, mais pontos!</p>
   </div>
 
   <div class="mode-lbl">Modo de jogo</div>
@@ -311,6 +328,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-w
 
 <!-- RESULT -->
 <div class="screen hidden" id="s-result">
+  <div class="confetti-jog" id="conf-jog" style="display:none"></div>
   <div class="res-logo-txt-wrap">
     <div class="res-logo-txt">UNI<span class="res-logo-hand">&#9664;</span>LUVAS</div>
   </div>
@@ -336,6 +354,25 @@ let loaderInterval=null;
 let loaderMsgIdx=0;
 const loaderMsgs=['Proteja suas mãos! 🧤','EPI salva vidas! ⚡','Pense rápido... ⏱️','Kevlar® DuPont™ 🛡️','Risco elétrico: USE isolante!','Corte: escolha o CA certo!','Solda: proteja tronco e mãos!','Segurança em 1º lugar! 🔒','Próxima pergunta a caminho...','Você está preparado? 💪','Nunca subestime o risco!','Verifique o CA do seu EPI!','Uniluvas: proteção que você pode confiar!','EPI certo = vida protegida! 🏆'];
 
+
+// ── CONFETTI ─────────────────────────────────────────────────
+function launchConfettiJog(){
+  const wrap=document.getElementById('conf-jog');
+  if(!wrap)return;
+  wrap.style.display='block'; wrap.innerHTML='';
+  const items=['🎉','⭐','🏆','✨','🧤','🥇','💛','🎊','🛡️','⚡'];
+  for(let i=0;i<55;i++){
+    const el=document.createElement('div');
+    el.className='conf-j';
+    el.textContent=items[Math.floor(Math.random()*items.length)];
+    el.style.left=Math.random()*100+'vw';
+    el.style.fontSize=(10+Math.random()*16)+'px';
+    el.style.animationDuration=(2.5+Math.random()*3.5)+'s';
+    el.style.animationDelay=(Math.random()*2)+'s';
+    wrap.appendChild(el);
+  }
+  setTimeout(()=>{if(wrap){wrap.style.display='none';wrap.innerHTML='';}},7000);
+}
 function showLoader(show){
   const el=document.getElementById('q-loading-wrap');
   if(!el)return;
@@ -626,11 +663,14 @@ function nextSolo(){
 function showSoloResult(){
   show('s-result');
   const total=soloQty*100;const pct=Math.round(myScore/total*100);
-  document.getElementById('res-trophy').textContent=pct>=80?'🏆':pct>=50?'🥈':'🎖️';
-  document.getElementById('res-rank-lbl').textContent='Aproveitamento';
-  document.getElementById('res-pos').textContent=pct+'%';
-  document.getElementById('res-score').textContent=myScore;
-  document.getElementById('res-sub').textContent='de '+total+' pontos possíveis ('+soloQty+' perguntas)';
+  document.getElementById('res-trophy').textContent=pct>=80?'🏆':pct>=60?'🥈':'🎖️';
+  document.getElementById('res-rank-lbl').textContent='Seu aproveitamento';
+  const posEl=document.getElementById('res-pos');
+  posEl.textContent=pct+'%';
+  posEl.className='res-pos'+(pct>=80?' winner':'');
+  document.getElementById('res-score').textContent=myScore+' pts';
+  document.getElementById('res-sub').textContent='de '+total+' pts possíveis · '+soloQty+' perguntas';
+  if(pct>=60)setTimeout(launchConfettiJog,300);
   document.getElementById('final-rank').innerHTML=
     '<p style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">'+
     (pct>=80?'Excelente! Você domina os EPIs Uniluvas! 🧤':pct>=50?'Bom desempenho! Continue aprendendo sobre proteção.':'Estude as fichas de produto Uniluvas e tente novamente.')+
@@ -730,9 +770,12 @@ function showMultiResult(){
     const myPos=list.findIndex(p=>p.me)+1;
     const trophies=['🏆','🥈','🥉'];
     document.getElementById('res-trophy').textContent=trophies[myPos-1]||'🎖️';
-    document.getElementById('res-pos').textContent=myPos+'º';
-    document.getElementById('res-score').textContent=myScore;
-    document.getElementById('res-sub').textContent='Você ficou em '+myPos+'º de '+list.length+' jogadores';
+    const posEl=document.getElementById('res-pos');
+    posEl.textContent=myPos+'º';
+    posEl.className='res-pos'+(myPos===1?' winner':'');
+    document.getElementById('res-score').textContent=myScore+' pts';
+    document.getElementById('res-sub').textContent=myPos+'º de '+list.length+' jogadores · '+myScore+' pontos';
+    if(myPos===1)setTimeout(launchConfettiJog,300);
     const medals=['🥇','🥈','🥉'];
     document.getElementById('final-rank').innerHTML=list.slice(0,5).map((p,i)=>
       '<div class="res-item'+(p.me?' me':'')+'"><div class="res-medal">'+(medals[i]||i+1)+'</div><div class="ol-name">'+p.name+'</div><div class="ol-score" style="font-family:Oswald,sans-serif;font-size:15px;font-weight:700;color:var(--navy)">'+p.score+'</div></div>').join('');
