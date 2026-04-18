@@ -150,8 +150,8 @@ main{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh
 .btn-ghost:hover{border-color:var(--border2);color:var(--text)}
 
 /* LOBBY */
-.lobby-body{display:flex;align-items:flex-start;justify-content:center;flex:1;gap:40px;padding:20px 40px;overflow-y:auto;min-height:0}
-.lob-left{max-width:480px;flex:1;display:flex;flex-direction:column;gap:0}
+.lobby-body{display:flex;align-items:center;justify-content:center;flex:1;gap:48px;padding:24px 40px}
+.lob-left{max-width:520px;flex:1}
 .lob-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(232,168,0,.1);
   border:1px solid rgba(232,168,0,.3);border-radius:20px;padding:5px 14px;
   font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px}
@@ -168,10 +168,10 @@ main{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh
 .lob-count-lbl{font-size:13px;color:var(--muted)}
 .btn-start{background:linear-gradient(135deg,var(--gold),#f0b800);color:#000;font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;padding:18px 40px;border-radius:13px;cursor:pointer;border:none;width:100%;margin-top:16px;box-shadow:0 4px 24px rgba(232,168,0,.5);transition:all .15s}
 .btn-start:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 8px 32px rgba(232,168,0,.6)}
-.lob-right{width:220px;flex-shrink:0;position:sticky;top:20px}
-.lob-qr-wrap{background:var(--navy);border-radius:18px;padding:18px;text-align:center;box-shadow:var(--sh2)}
+.lob-right{width:240px;flex-shrink:0}
+.lob-qr-wrap{background:var(--navy);border-radius:18px;padding:20px;text-align:center;width:100%}
 .lob-qr-lbl{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.lob-qr-inner{background:#fff;border-radius:10px;padding:10px;display:inline-block}
+.lob-qr-inner{display:flex;align-items:center;justify-content:center;margin:12px auto;width:200px;height:200px}
 .lob-url{font-size:10px;color:rgba(255,255,255,.35);margin-top:8px;max-width:180px;
   text-align:center;word-break:break-all;line-height:1.5}
 
@@ -249,20 +249,15 @@ main{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh
         <div class="lob-logo-sub2">LUVAS ESPECIAIS</div>
       </div>
       <h1 class="lob-h">Qual EPI<br>Protege <em>Você?</em></h1>
-      <p class="lob-sub">Teste seus conhecimentos sobre EPIs Uniluvas. Para cada cenário de risco real da mineração, identifique o equipamento correto.</p>
-      <div class="lob-chips">
-        <span class="chip">⚡ Risco Elétrico</span><span class="chip">✂️ Risco de Corte</span>
-        <span class="chip">🔥 Alta Temperatura</span><span class="chip">⚙️ Proteção Mecânica</span>
-        <span class="chip">🧪 Risco Químico</span>
-      </div>
-      <div class="lob-room-box">
+      
+      <div class="lob-count" style="margin:16px 0 8px"><span class="lob-count-num" id="lobby-pcount">0</span><span class="lob-count-lbl">jogadores conectados</span></div>
+      <button class="btn-start" onclick="startGame()">▶ INICIAR O QUIZ</button>
+      <div class="lob-room-box" style="margin-top:14px">
         <div class="lob-room-box-label">CÓDIGO DA SALA</div>
         <div class="lob-room-box-code" id="lob-room-code">SIPATMIN2026</div>
         <div class="lob-room-box-hint">Jogadores digitam este código para entrar</div>
         <button class="btn-change-room" onclick="changeRoom()">✏️ Trocar código</button>
       </div>
-      <div class="lob-count"><span class="lob-count-num" id="lobby-pcount">0</span><span class="lob-count-lbl">jogadores conectados</span></div>
-      <button class="btn-start" onclick="startGame()">▶ INICIAR O QUIZ</button>
     </div>
     <div class="lob-right">
       <div class="lob-qr-wrap">
@@ -491,7 +486,10 @@ const ALL_Q=[
 
 let currentQ=0,timerInterval=null,timeLeft=20,revealed=false,sessionId='quiz_'+Date.now();
 let votesRef=null,rankRef=null;
-const playerURL=location.href.replace('sipatmin_telao','sipatmin_jogador');
+const // Build jogador URL from current location
+const base=location.href.replace(/\/telao(\.html)?(\?.*)?$/, '');
+const JOGADOR_URL=base+'/jogador';
+const playerURL=JOGADOR_URL;
 
 function scrollToStart(){
   const btn=document.querySelector('.btn-start');
@@ -514,9 +512,10 @@ function makeQR(el, url, size){
   el.appendChild(img);
 }
 function initQRs(){
-  makeQR(document.getElementById('lobby-qr-box'), GITHUB_JOGADOR_URL, 180);
-  setTimeout(()=>makeQR(document.getElementById('sidebar-qr-box'), GITHUB_JOGADOR_URL, 110), 300);
-  document.getElementById('lobby-url-text').textContent='andreicosta8.github.io/sipatmin/jogador';
+  makeQR(document.getElementById('lobby-qr-box'), playerURL, 200);
+  setTimeout(()=>makeQR(document.getElementById('sidebar-qr-box'), playerURL, 110), 300);
+  const shortURL=playerURL.replace('https://','');
+  document.getElementById('lobby-url-text').textContent=shortURL;
 }
 
 function getTag(q){
