@@ -18,7 +18,8 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow-x:hidden}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-width:430px;margin:0 auto}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+#app-wrap{max-width:430px;margin:0 auto;min-height:100vh;position:relative}
 
 /* HEADER */
 .hdr{background:var(--navy);padding:0 14px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0}
@@ -213,6 +214,36 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);max-w
 .inp-room-code{letter-spacing:2px;font-weight:700;font-size:15px;text-transform:uppercase}
 .inp-room-code:focus{border-color:var(--gold)!important}
 .room-code-hint{font-size:10px;color:var(--muted);margin-top:3px;text-align:center}
+
+
+/* ── RESPONSIVE DESKTOP ─────────────────────────── */
+@media(min-width:600px){
+  #app-wrap{max-width:620px!important}
+  #s-lobby{padding:32px 36px 48px}
+  .lob-logo-txt{font-size:52px}
+  .lob-h{font-size:36px}
+  .lob-field{max-width:400px;margin-left:auto;margin-right:auto}
+  .btn-primary{max-width:400px;margin-left:auto;margin-right:auto;display:block}
+  .mode-grid{max-width:460px;margin:0 auto 16px}
+  .opts{gap:14px;padding:14px 28px 0}
+  .opt-img{height:110px}
+  .q-body{padding:18px 28px 10px}
+  .q-topbar{padding:12px 28px}
+  #s-result{padding:36px}
+  .res-pos{font-size:76px}
+  .res-card{max-width:400px;margin:0 auto}
+}
+@media(min-width:900px){
+  #app-wrap{max-width:780px!important}
+  .opts{grid-template-columns:repeat(4,1fr)!important;gap:16px;padding:16px 36px 0}
+  .opt-img{height:120px}
+  .q-body{padding:20px 36px 12px;font-size:18px}
+  .q-topbar{padding:14px 36px}
+  .q-text{font-size:20px}
+  #s-lobby{padding:40px 60px}
+  .lob-logo-txt{font-size:64px}
+  .lob-h{font-size:44px}
+}
 
 </style>
 </head>
@@ -851,6 +882,7 @@ setMode('multi');
   </div>
   <div class="glove-palm"></div>
   <div class="loading-msg" id="loading-msg">Aguardando...</div>
+</div>
 </div>
 </body>
 </html>
