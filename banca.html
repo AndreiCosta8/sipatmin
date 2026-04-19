@@ -177,6 +177,76 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   .opt-img{height:110px}
   .q-text{font-size:20px}
 }
+
+/* ── LANDING PAGE ────────────────────────────── */
+.landing-hero{background:var(--navy);padding:36px 24px 28px;
+  position:relative;overflow:hidden;text-align:center;flex-shrink:0}
+.hero-bg-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(232,168,0,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(232,168,0,.05) 1px,transparent 1px);
+  background-size:32px 32px;pointer-events:none}
+.hero-content{position:relative;z-index:1}
+.hero-logo{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;
+  color:#fff;letter-spacing:3px;display:flex;align-items:center;
+  justify-content:center;gap:0}
+.hero-logo-tri{color:var(--gold);font-size:24px;margin:0 4px}
+.hero-logo-sub{font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.3);
+  text-transform:uppercase;margin-bottom:16px}
+.hero-glove{font-size:52px;margin:8px 0;
+  animation:gloveFloat 2s ease-in-out infinite}
+@keyframes gloveFloat{0%,100%{transform:translateY(0) rotate(-5deg)}
+  50%{transform:translateY(-8px) rotate(5deg)}}
+.hero-title{font-family:'Oswald',sans-serif;font-size:40px;font-weight:700;
+  color:#fff;line-height:1;margin-bottom:8px}
+.hero-title-em{color:var(--gold)}
+.hero-subtitle{font-size:13px;color:rgba(255,255,255,.5);
+  line-height:1.5;max-width:280px;margin:0 auto 16px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.hero-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:4px 12px;font-size:10px;color:rgba(255,255,255,.7);
+  font-weight:600}
+.landing-form{padding:24px 20px;flex:1}
+.form-card{background:var(--white);border:1.5px solid var(--border);
+  border-radius:16px;padding:20px}
+.form-card-h{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;
+  color:var(--navy);margin-bottom:14px}
+.form-hint{font-size:11px;color:var(--muted);text-align:center;
+  margin-top:12px;line-height:1.5}
+
+/* ── WAITING SCREEN ──────────────────────────── */
+#s-waiting{background:var(--navy);color:#fff;align-items:center;
+  justify-content:center;gap:0;padding:40px 24px;text-align:center}
+.wait-anim-wrap{position:relative;margin-bottom:20px}
+.wait-glove{font-size:64px;animation:gloveFloat 2s ease-in-out infinite;display:block}
+.wait-pulse-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:90px;height:90px;border-radius:50%;border:3px solid rgba(232,168,0,.3);
+  animation:ringPulse 2s ease-out infinite}
+.wait-pulse-ring2{animation-delay:.6s;border-color:rgba(232,168,0,.15)}
+@keyframes ringPulse{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+.wait-title{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;
+  color:#fff;margin-bottom:6px}
+.wait-player{font-size:16px;font-weight:600;color:var(--gold);margin-bottom:4px}
+.wait-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:20px;line-height:1.5}
+.wait-dots{display:flex;gap:8px;justify-content:center}
+.wait-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);
+  animation:dotB 1.2s ease-in-out infinite}
+.wait-dot:nth-child(2){animation-delay:.2s;background:rgba(255,255,255,.4)}
+.wait-dot:nth-child(3){animation-delay:.4s;background:var(--gold)}
+
+/* ── COUNTDOWN OVERLAY ───────────────────────── */
+#countdown-jog{position:fixed;inset:0;background:rgba(10,22,40,.92);
+  z-index:9990;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px}
+#countdown-jog.active{display:flex}
+.cnt-num{font-family:'Oswald',sans-serif;font-size:130px;font-weight:700;
+  color:#fff;line-height:1;animation:cntBounce .5s cubic-bezier(.17,.89,.32,1.28)}
+@keyframes cntBounce{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.cnt-go{font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;
+  color:var(--gold);animation:cntBounce .4s cubic-bezier(.17,.89,.32,1.28)}
+.cnt-sub{font-size:14px;color:rgba(255,255,255,.5);
+  text-transform:uppercase;letter-spacing:2px}
+
 </style>
 </head>
 <body>
@@ -194,26 +264,68 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   </div>
 </div>
 
-<!-- LOBBY -->
-<div class="screen" id="s-lobby">
-  <div class="lob-logo">UNI<span class="lob-logo-tri">&#9664;</span>LUVAS</div>
-  <div class="lob-sub-brand">Luvas Especiais</div>
-  <div class="lob-h">Quiz <em>EPI</em></div>
-  <div class="lob-desc">Teste seu conhecimento sobre EPIs Uniluvas. Responda certo e rápido para pontuar mais!</div>
-  <label class="form-lbl">Seu nome</label>
-  <input class="inp" id="inp-name" type="text" placeholder="Como aparecer no ranking?" maxlength="24" autocomplete="off"/>
-  <button class="btn-enter" onclick="enterGame()">ENTRAR NO QUIZ →</button>
+<!-- LANDING / LOBBY -->
+<div class="screen" id="s-lobby" style="padding:0;overflow:hidden">
+
+  <!-- HERO SECTION -->
+  <div class="landing-hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <div class="hero-logo">UNI<span class="hero-logo-tri">&#9664;</span>LUVAS</div>
+      <div class="hero-logo-sub">Luvas Especiais</div>
+      <div class="hero-glove">🧤</div>
+      <div class="hero-title">Quiz <span class="hero-title-em">EPI</span></div>
+      <div class="hero-subtitle">Teste seu conhecimento sobre equipamentos de proteção individual</div>
+      <div class="hero-chips">
+        <span class="hero-chip">⚡ Risco Elétrico</span>
+        <span class="hero-chip">✂️ Corte</span>
+        <span class="hero-chip">🔥 Temperatura</span>
+        <span class="hero-chip">⚙️ Impacto</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM SECTION -->
+  <div class="landing-form">
+    <div class="form-card">
+      <div class="form-card-h">Pronto para jogar?</div>
+      <label class="form-lbl">Seu nome</label>
+      <input class="inp" id="inp-name" type="text" 
+        placeholder="Como aparecer no ranking?" 
+        maxlength="24" autocomplete="off"
+        onkeydown="if(event.key==='Enter')enterGame()"/>
+      <button class="btn-enter" onclick="enterGame()">
+        ENTRAR NO QUIZ →
+      </button>
+      <div class="form-hint">
+        🏆 Responda rápido para ganhar pontos bônus!
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- WAITING -->
 <div class="screen hidden" id="s-waiting">
-  <div class="wait-icon">🧤</div>
-  <div class="wait-h">Aguardando início...</div>
-  <div class="wait-name" id="wait-name"></div>
-  <div class="wait-sub">O apresentador irá iniciar o quiz em breve</div>
-  <div class="dots">
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="wait-anim-wrap">
+    <div class="wait-pulse-ring"></div>
+    <div class="wait-pulse-ring wait-pulse-ring2"></div>
+    <span class="wait-glove">🧤</span>
   </div>
+  <div class="wait-player" id="wait-name"></div>
+  <div class="wait-title">Aguardando início</div>
+  <div class="wait-sub">O apresentador vai iniciar o quiz em breve.<br>Fique pronto!</div>
+  <div class="wait-dots">
+    <div class="wait-dot"></div>
+    <div class="wait-dot"></div>
+    <div class="wait-dot"></div>
+  </div>
+</div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div id="countdown-jog">
+  <div id="cnt-display" class="cnt-num">3</div>
+  <div class="cnt-sub" id="cnt-sub">Prepare-se!</div>
 </div>
 
 <!-- QUESTION -->
@@ -517,8 +629,64 @@ function detectRoom(){
   );
 }
 
+
+// ── SOUND SYSTEM (JOGADOR) ────────────────────────────────────
+const _AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _audioCtx = null;
+
+function _getCtx(){
+  if(!_audioCtx) _audioCtx = new _AudioCtx();
+  if(_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+function _tone(freq, dur, type='sine', gain=0.3, delay=0){
+  try{
+    const ctx=_getCtx();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,ctx.currentTime+delay);
+    g.gain.linearRampToValueAtTime(gain,ctx.currentTime+delay+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
+    o.start(ctx.currentTime+delay);
+    o.stop(ctx.currentTime+delay+dur+0.05);
+  }catch(e){}
+}
+function sndCorrect(){ _tone(523,.1,'triangle',.25,0);_tone(659,.1,'triangle',.25,.1);_tone(784,.2,'triangle',.3,.2);_tone(1047,.3,'triangle',.2,.35); }
+function sndWrong(){ _tone(280,.15,'sawtooth',.2,0);_tone(200,.3,'sawtooth',.15,.12); }
+function sndCountdown(n){ _tone(n===0?880:440,.1,'square',.15); }
+function sndTick(){ _tone(600,.04,'square',.08); }
+
+// ── COUNTDOWN FOR JOGADOR ─────────────────────────────────────
+function showCountdown(cb){
+  const overlay=document.getElementById('countdown-jog');
+  const display=document.getElementById('cnt-display');
+  const sub=document.getElementById('cnt-sub');
+  if(!overlay) return cb();
+  overlay.classList.add('active');
+  let n=3;
+  function tick(){
+    sndCountdown(n);
+    if(n>0){
+      display.className='cnt-num';
+      display.textContent=n;
+      sub.textContent='Prepare-se!';
+      void display.offsetWidth; // force reflow for animation restart
+      n--; setTimeout(tick,900);
+    } else {
+      display.className='cnt-go';
+      display.textContent='VAI!';
+      sub.textContent='';
+      setTimeout(()=>{ overlay.classList.remove('active'); cb(); },700);
+    }
+  }
+  tick();
+}
+
 // ── ENTER GAME ────────────────────────────────────────────────
 function enterGame(){
+  // Unlock audio context on user gesture
+  try{ _getCtx(); }catch(e){}
   const n=document.getElementById('inp-name').value.trim();
   if(!n){
     document.getElementById('inp-name').style.borderColor='var(--red)';
@@ -569,7 +737,13 @@ function listenSession(){
 function loadQuestion(data){
   showLoader(false);
   answered=false;
-  show('s-question');
+  // Show countdown before FIRST question of session
+  if(data.idx===0){
+    show('s-question');
+    showCountdown(()=>{ /* game already showing */ });
+  } else {
+    show('s-question');
+  }
   document.getElementById('feedback').classList.add('hidden');
   document.getElementById('wait-next').classList.add('hidden');
   document.getElementById('q-num').textContent='PERGUNTA '+(data.idx+1)+' / '+(data.totalQ||12);
@@ -619,6 +793,7 @@ function updateTimer(){
   const el=document.getElementById('q-timer');
   el.textContent=timeLeft;
   el.className='q-timer'+(timeLeft<=5?' urgent':timeLeft<=10?' warn':'');
+  if(timeLeft<=5 && timeLeft>0) sndTick();
 }
 
 // ── CHOOSE OPTION ─────────────────────────────────────────────
@@ -684,16 +859,18 @@ function showReveal(correctIdx){
   fb.classList.remove('hidden','ok','ko');
   
   if(ok){
+    sndCorrect();
     const pts=100+myBonus;
     myScore+=pts;
     document.getElementById('score-num').textContent=myScore;
-    console.log('Score updated: '+myScore+' pts (Q'+currentQIdx+', +'+pts+')');
     fb.className='feedback ok';
     fb.textContent='✓ Correto! +'+pts+' pontos'+(myBonus>60?' ⚡ Resposta rápida!':'');
   } else if(myChoice>=0){
+    sndWrong();
     fb.className='feedback ko';
     fb.textContent='✗ Errou! A correta está destacada em verde.';
   } else {
+    sndWrong();
     fb.className='feedback ko';
     fb.textContent='⏱ Tempo esgotado! A correta está em verde.';
   }
