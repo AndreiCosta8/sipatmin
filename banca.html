@@ -542,7 +542,15 @@ function listenSession(){
   db.ref('sipatmin/'+ROOM_CODE+'/session').on('value',snap=>{
     const sess=snap.val();
     if(!sess||!sess.active) return;
-    currentSessionId=sess.sessionId;
+    // New session started - reset tracking
+    if(sess.sessionId !== currentSessionId){
+      currentSessionId=sess.sessionId;
+      currentQIdx=-1;
+      Object.keys(myAnswers).forEach(k=>delete myAnswers[k]);
+      Object.keys(revealed).forEach(k=>delete revealed[k]);
+      myScore=0;
+      document.getElementById('score-num').textContent=0;
+    }
   });
   // Listen for questions
   db.ref('sipatmin/'+ROOM_CODE+'/currentQuestion').on('value',snap=>{
@@ -614,24 +622,27 @@ function updateTimer(){
 }
 
 // ── CHOOSE OPTION ─────────────────────────────────────────────
+// Track answer per question index to avoid cross-question pollution
+const myAnswers = {}; // {qIdx: {choice, bonus}}
+
 function chooseOpt(i, qIdx){
   if(answered) return;
   answered=true;
   clearInterval(timerInterval);
   document.querySelectorAll('.opt').forEach((el,j)=>{
-    el.classList.add('disabled','selected'[j===i?'selected':'']);
+    el.classList.add('disabled');
     if(j===i) el.classList.add('selected');
   });
-  // Save vote
+  // Calculate bonus at answer time
   const bonus=Math.round((timeLeft/20)*100);
+  // Store answer keyed by question index
+  myAnswers[qIdx]={choice:i, bonus:bonus};
+  // Save vote to Firebase
   db.ref('sipatmin/'+ROOM_CODE+'/votes/'+qIdx+'/'+uid).set(i);
-  // Show loader while waiting for reveal
+  // Show waiting message
   document.getElementById('wait-next').classList.remove('hidden');
   document.getElementById('wait-next').textContent='✓ Resposta registrada! Aguardando...';
   showLoader(true);
-  // Store chosen for reveal
-  window._myChoice=i;
-  window._myBonus=bonus;
 }
 
 function lockOut(){
@@ -641,16 +652,24 @@ function lockOut(){
   document.getElementById('wait-next').classList.remove('hidden');
   document.getElementById('wait-next').textContent='⏱ Tempo esgotado!';
   showLoader(true);
-  window._myChoice=-1;
-  window._myBonus=0;
+  // Mark as no answer for this question
+  if(!(currentQIdx in myAnswers)) myAnswers[currentQIdx]={choice:-1,bonus:0};
 }
 
 // ── SHOW REVEAL ───────────────────────────────────────────────
+// Track which questions have been revealed to avoid double-scoring
+const revealed = {};
+
 function showReveal(correctIdx){
   showLoader(false);
   if(correctIdx==null) return;
-  const myChoice=window._myChoice;
-  const myBonus=window._myBonus||0;
+  // Avoid double-scoring same question
+  if(revealed[currentQIdx]) return;
+  revealed[currentQIdx]=true;
+  // Get this player's answer for this question
+  const ans=myAnswers[currentQIdx]||{choice:-1,bonus:0};
+  const myChoice=ans.choice;
+  const myBonus=ans.bonus;
   const ok=myChoice===correctIdx;
   
   document.querySelectorAll('.opt').forEach((el,i)=>{
@@ -668,6 +687,7 @@ function showReveal(correctIdx){
     const pts=100+myBonus;
     myScore+=pts;
     document.getElementById('score-num').textContent=myScore;
+    console.log('Score updated: '+myScore+' pts (Q'+currentQIdx+', +'+pts+')');
     fb.className='feedback ok';
     fb.textContent='✓ Correto! +'+pts+' pontos'+(myBonus>60?' ⚡ Resposta rápida!':'');
   } else if(myChoice>=0){
@@ -678,8 +698,8 @@ function showReveal(correctIdx){
     fb.textContent='⏱ Tempo esgotado! A correta está em verde.';
   }
   
-  // Update score in Firebase
-  db.ref('sipatmin/'+ROOM_CODE+'/players/'+uid).update({score:myScore});
+  // Update score in Firebase using transaction to avoid race conditions
+  db.ref('sipatmin/'+ROOM_CODE+'/players/'+uid+'/score').set(myScore);
 }
 
 // ── SHOW RESULT ───────────────────────────────────────────────
