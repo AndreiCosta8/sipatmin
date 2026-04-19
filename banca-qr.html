@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Uniluvas · Banca EPI</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#152240;--gold:#e8a800;--gold2:#fbbf00;
+  --green:#1a9e5c;--bg:#f0f2f5;--white:#fff;--border:#dde3ed;
+  --text:#1a2a4a;--muted:#6b7a99;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--navy);overflow:hidden}
+
+/* ── BACKGROUND ──────────────────────── */
+.bg-grid{position:fixed;inset:0;
+  background-image:linear-gradient(rgba(232,168,0,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(232,168,0,.04) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0}
+.bg-glow{position:fixed;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,168,0,.08) 0%,transparent 70%);
+  top:-150px;right:-100px;pointer-events:none;z-index:0;
+  animation:glowMove 8s ease-in-out infinite alternate}
+@keyframes glowMove{from{transform:translate(0,0)}to{transform:translate(-40px,60px)}}
+
+/* ── LAYOUT ──────────────────────────── */
+.page{position:relative;z-index:1;height:100vh;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;gap:0}
+
+/* ── LOGO ────────────────────────────── */
+.logo{font-family:'Oswald',sans-serif;font-size:clamp(36px,5vw,56px);
+  font-weight:700;color:#fff;letter-spacing:3px;
+  display:flex;align-items:center;margin-bottom:4px}
+.logo-tri{color:var(--gold);font-size:clamp(28px,4vw,44px);margin:0 6px}
+.logo-sub{font-size:clamp(10px,1.2vw,14px);color:rgba(255,255,255,.4);
+  letter-spacing:5px;text-transform:uppercase;margin-bottom:32px}
+
+/* ── CALL TO ACTION ──────────────────── */
+.cta{font-family:'Oswald',sans-serif;font-size:clamp(22px,3.5vw,40px);
+  font-weight:700;color:#fff;text-align:center;margin-bottom:8px;line-height:1.2}
+.cta em{color:var(--gold);font-style:normal}
+.cta-sub{font-size:clamp(12px,1.5vw,17px);color:rgba(255,255,255,.5);
+  text-align:center;margin-bottom:32px;max-width:460px;line-height:1.6}
+
+/* ── QR BOX ──────────────────────────── */
+.qr-box{background:#fff;border-radius:24px;padding:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 0 1px rgba(232,168,0,.2);
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  animation:qrPop .6s cubic-bezier(.17,.89,.32,1.28)}
+@keyframes qrPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.qr-box img{display:block;border-radius:10px;width:clamp(200px,25vw,300px);height:clamp(200px,25vw,300px)}
+.qr-label{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:2px;font-weight:600;text-align:center}
+.qr-url{font-size:clamp(10px,1.2vw,13px);color:var(--text);font-weight:600;
+  background:var(--bg);border-radius:8px;padding:6px 14px;
+  letter-spacing:.3px;text-align:center}
+
+/* ── MODES CHIPS ─────────────────────── */
+.modes{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center}
+.mode-chip{display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:30px;padding:10px 20px;color:#fff;font-size:14px;font-weight:600}
+.mode-chip .mc-icon{font-size:20px}
+.mode-chip.solo{border-color:rgba(232,168,0,.4);background:rgba(232,168,0,.08)}
+.mode-chip.grupo{border-color:rgba(26,158,92,.4);background:rgba(26,158,92,.08)}
+
+/* ── FOOTER ──────────────────────────── */
+.footer{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.5px}
+.footer-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.5}
+
+/* ── PULSE BORDER ────────────────────── */
+.qr-box{position:relative}
+.qr-box::after{content:'';position:absolute;inset:-3px;border-radius:27px;
+  border:2px solid var(--gold);opacity:0;
+  animation:pulseBorder 2.5s ease-in-out infinite}
+@keyframes pulseBorder{0%,100%{opacity:0;transform:scale(1)}50%{opacity:.4;transform:scale(1.01)}}
+
+/* ── DOTS ANIMATION ──────────────────── */
+.scan-hint{display:flex;align-items:center;gap:6px;margin-top:12px;
+  font-size:12px;color:rgba(255,255,255,.4)}
+.dot-anim{display:flex;gap:4px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--gold);
+  animation:dotB 1.2s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes dotB{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1.2);opacity:1}}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="page">
+
+  <!-- LOGO -->
+  <div class="logo">UNI<span class="logo-tri">&#9664;</span>LUVAS</div>
+  <div class="logo-sub">Luvas Especiais</div>
+
+  <!-- CALL TO ACTION -->
+  <div class="cta">Escaneie e<br>teste seus <em>conhecimentos!</em></div>
+  <div class="cta-sub">Identifique o EPI certo para cada risco. Jogue solo ou desafie quem está aqui!</div>
+
+  <!-- QR CODE -->
+  <div class="qr-box">
+    <img src="data:image/png;base64,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" alt="QR Code Banca Uniluvas"/>
+    <div class="qr-label">Aponte a câmera para jogar</div>
+    <div class="qr-url">andreicosta8.github.io/sipatmin/banca</div>
+  </div>
+
+  <!-- SCAN HINT -->
+  <div class="scan-hint">
+    <div class="dot-anim"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    Aguardando jogadores
+  </div>
+
+  <!-- MODES -->
+  <div class="modes">
+    <div class="mode-chip solo">
+      <span class="mc-icon">🎯</span>
+      <span>Solo — jogue no seu ritmo</span>
+    </div>
+    <div class="mode-chip grupo">
+      <span class="mc-icon">👥</span>
+      <span>Grupo — compita com outros</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-dot"></div>
+  <span>Uniluvas SIPATMIN 2026</span>
+  <div class="footer-dot"></div>
+  <span>Quiz EPI · Banca</span>
+  <div class="footer-dot"></div>
+</div>
+
+</body>
+</html>
