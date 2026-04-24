@@ -281,6 +281,21 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <div id="screen-lobby">
       <div class="card">
         <div class="card-h">👥 Jogadores conectados</div>
+        <!-- ROOM CODE DISPLAY - BIG AND CLEAR -->
+        <div style="background:var(--navy);border-radius:12px;padding:16px;
+          text-align:center;margin-bottom:16px">
+          <div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;
+            letter-spacing:2px;margin-bottom:6px">Código da Sala</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;
+            color:var(--gold);letter-spacing:4px" id="room-code-big">BANCA</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:4px">
+            Jogadores digitam este código para entrar</div>
+          <button onclick="changeRoomCode()" style="margin-top:10px;background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:6px;
+            padding:5px 14px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif">
+            ✏️ Trocar código</button>
+        </div>
+
         <div class="lobby-status">
           <div class="status-dot online" id="status-dot"></div>
           <div class="status-txt">Sala aberta — aguardando jogadores</div>
@@ -372,7 +387,16 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <div class="card qr-wrap">
       <div class="qr-lbl">Jogadores escaneiam aqui</div>
       <img src="data:image/png;base64,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" width="200" height="200" alt="QR Banca"/>
-      <div class="qr-room" id="qr-room-code">BANCA</div>
+      <div style="margin-top:10px">
+    <div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;
+      text-transform:uppercase;margin-bottom:4px">Código da sala</div>
+    <div class="qr-room" id="qr-room-code" 
+      style="font-size:20px;letter-spacing:3px;cursor:pointer"
+      onclick="changeRoomCode()" title="Clique para trocar">BANCA</div>
+    <div style="font-size:9px;color:rgba(255,255,255,.25);margin-top:3px">
+      clique para trocar
+    </div>
+  </div>
       <div class="qr-url">andreicosta8.github.io/sipatmin/banca</div>
     </div>
 
@@ -632,6 +656,31 @@ function initConnectionMonitor(){
   connCheckTimer = setTimeout(()=>{
     if(!isConnected) showConnError();
   }, 8000);
+}
+
+
+function updateRoomDisplay(){
+  ['conn-room','qr-room-code','room-code-big'].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e) e.textContent=ROOM_CODE;
+  });
+}
+
+function changeRoomCode(){
+  const novo = prompt('Digite o novo código da sala\n(jogadores deverão usar este código):', ROOM_CODE);
+  if(!novo || !novo.trim()) return;
+  ROOM_CODE = novo.trim().toUpperCase().replace(/\s+/g,'');
+  // Update display FIRST (works even offline)
+  updateRoomDisplay();
+  // Then try Firebase (might fail locally - that's OK)
+  try{
+    db.ref().off();
+    db.ref('sipatmin/'+ROOM_CODE+'/session').set({active:false});
+    listenPlayers();
+    listenRanking();
+    initConnectionMonitor();
+  }catch(e){ console.warn('Firebase offline - room code updated locally only'); }
+  alert('Sala alterada para: '+ROOM_CODE+'\n\nPeça para os jogadores usarem este código!');
 }
 
 function updateConnUI(connected){
