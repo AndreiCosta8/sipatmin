@@ -289,6 +289,17 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   <div class="landing-form">
     <div class="form-card">
       <div class="form-card-h">Pronto para jogar?</div>
+      <label class="form-lbl">Código da Sala</label>
+      <input class="inp" id="inp-room" type="text"
+        placeholder="Ex: BANCA"
+        maxlength="20" autocomplete="off"
+        style="text-transform:uppercase;letter-spacing:2px;font-weight:700;font-size:16px"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')document.getElementById('inp-name').focus()"/>
+      <div style="font-size:11px;color:var(--muted);margin:-8px 0 10px;text-align:center">
+        📺 Veja o código na tela do apresentador
+      </div>
+
       <label class="form-lbl">Seu nome</label>
       <input class="inp" id="inp-name" type="text" 
         placeholder="Como aparecer no ranking?" 
@@ -757,6 +768,14 @@ function enterGame(){
     document.getElementById('inp-name').placeholder='⚠️ Digite seu nome!';
     return;
   }
+  // Read room code from input
+  const r = document.getElementById('inp-room');
+  const roomVal = r ? r.value.trim().toUpperCase() : '';
+  if(!roomVal){
+    if(r){ r.style.borderColor='var(--red)'; r.placeholder='⚠️ Digite o código!'; }
+    return;
+  }
+  ROOM_CODE = roomVal;
   playerName=n;
   // Register in Firebase
   db.ref('sipatmin/'+ROOM_CODE+'/players/'+uid).set({
@@ -1016,7 +1035,6 @@ function playAgain(){
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-detectRoom();
 initConnMonitor();
 </script>
 </body>
