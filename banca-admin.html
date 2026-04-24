@@ -241,6 +241,37 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   </div>
 </div>
 
+<!-- CONNECTION STATUS BAR -->
+<div id="conn-status-bar" style="background:rgba(26,158,92,.08);border-bottom:1px solid rgba(26,158,92,.15);
+  padding:6px 24px;display:flex;align-items:center;gap:8px">
+  <div id="conn-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;transition:all .3s"></div>
+  <span id="conn-lbl" style="font-size:11px;color:var(--muted);font-weight:600">Conectando ao Firebase...</span>
+  <span style="flex:1"></span>
+  <span style="font-size:10px;color:var(--muted)">Sala: <strong id="conn-room">BANCA</strong></span>
+</div>
+
+<!-- CONNECTION ERROR BANNER -->
+<div id="conn-error-banner" style="display:none;background:#fef2f2;border-bottom:2px solid #fca5a5;
+  padding:12px 24px;align-items:center;gap:12px;flex-wrap:wrap">
+  <span style="font-size:18px">📵</span>
+  <div style="flex:1">
+    <div style="font-weight:700;color:#991b1b;font-size:13px">Sem conexão com Firebase</div>
+    <div style="font-size:11px;color:#b91c1c;margin-top:2px">
+      Verifique o 4G/5G · Firebase pode estar bloqueado na rede · Tente hotspot de outro celular
+    </div>
+  </div>
+  <button id="btn-retry-conn" onclick="forceReconnect()" 
+    style="background:#991b1b;color:#fff;border:none;border-radius:8px;
+    padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">
+    ↻ Tentar novamente
+  </button>
+  <button onclick="showContingency()"
+    style="background:transparent;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;
+    padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">
+    📋 Plano B
+  </button>
+</div>
+
 <div class="layout">
 
   <!-- MAIN AREA -->
@@ -577,7 +608,99 @@ const IMG={
 function path(p){ return 'sipatmin/' + ROOM_CODE + '/' + p; }
 
 // ── INIT ─────────────────────────────────────────────────────────
+
+// ── FIREBASE CONNECTION MONITOR ──────────────────────────────
+let isConnected = false;
+let connRetries = 0;
+let connCheckTimer = null;
+
+function initConnectionMonitor(){
+  // Firebase built-in connection state
+  db.ref('.info/connected').on('value', snap => {
+    isConnected = snap.val() === true;
+    updateConnUI(isConnected);
+    if(isConnected){
+      connRetries = 0;
+      clearTimeout(connCheckTimer);
+      hideConnError();
+    } else {
+      scheduleReconnect();
+    }
+  });
+
+  // If not connected after 8 seconds, show error
+  connCheckTimer = setTimeout(()=>{
+    if(!isConnected) showConnError();
+  }, 8000);
+}
+
+function updateConnUI(connected){
+  const dot  = document.getElementById('conn-dot');
+  const lbl  = document.getElementById('conn-lbl');
+  const badge = document.getElementById('tb-badge');
+  if(dot){
+    dot.style.background = connected ? 'var(--green)' : '#e8503a';
+    dot.style.boxShadow  = connected
+      ? '0 0 0 3px rgba(26,158,92,.25)'
+      : '0 0 0 3px rgba(232,80,58,.25)';
+  }
+  if(lbl) lbl.textContent = connected ? 'Firebase conectado' : 'Sem conexão...';
+}
+
+function scheduleReconnect(){
+  connRetries++;
+  const delay = Math.min(3000 * connRetries, 15000);
+  setTimeout(()=>{
+    if(!isConnected){
+      db.goOffline();
+      setTimeout(()=>{ db.goOnline(); }, 500);
+    }
+  }, delay);
+  // Show error after 3 failed retries
+  if(connRetries >= 3) showConnError();
+}
+
+function showConnError(){
+  const el = document.getElementById('conn-error-banner');
+  if(el) el.style.display = 'flex';
+}
+
+function hideConnError(){
+  const el = document.getElementById('conn-error-banner');
+  if(el) el.style.display = 'none';
+}
+
+function retryConnection(){
+  connRetries = 0;
+  hideConnError();
+  updateConnUI(false);
+  db.goOffline();
+  setTimeout(()=>{
+    db.goOnline();
+    connCheckTimer = setTimeout(()=>{
+      if(!isConnected) showConnError();
+    }, 8000);
+  }, 800);
+}
+
+function showContingency(){
+  document.getElementById('contingency-modal').style.display='flex';
+}
+function closeContingency(){
+  document.getElementById('contingency-modal').style.display='none';
+}
+function forceReconnect(){
+  retryConnection();
+  // Also show feedback
+  const btn = document.getElementById('btn-retry-conn');
+  if(btn){ btn.textContent='Reconectando...'; btn.disabled=true;
+    setTimeout(()=>{ btn.textContent='↻ Tentar novamente'; btn.disabled=false; }, 4000); }
+}
+
 window.addEventListener('load', ()=>{
+  initConnectionMonitor();
+  // Publish active room so jogadores can sync automatically
+  db.ref('sipatmin/activeRoom').set(ROOM_CODE);
   listenPlayers();
   listenRanking();
   // Reset any stale session
@@ -1059,6 +1182,24 @@ function finishGame(){
   });
 }
 
+
+// ── CHANGE ROOM CODE ──────────────────────────────────────────
+function changeRoom(){
+  const newRoom = prompt('Código da sala (ex: EVENTO2026):', ROOM_CODE);
+  if(!newRoom || !newRoom.trim()) return;
+  ROOM_CODE = newRoom.trim().toUpperCase();
+  ['lob-room-code','conn-room','qr-room-code'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent = ROOM_CODE;
+  });
+  // Publish to Firebase so jogadores auto-sync
+  db.ref('sipatmin/activeRoom').set(ROOM_CODE);
+  // Reset listeners
+  db.ref('sipatmin/' + ROOM_CODE + '/session').set({active:false});
+  listenPlayers();
+  listenRanking();
+}
+
 // ── RESET ─────────────────────────────────────────────────────────
 function resetGame(){
   if(!confirm('Encerrar sessão e voltar ao lobby?')) return;
@@ -1105,5 +1246,34 @@ function launchConfetti(){
   setTimeout(()=>{ wrap.innerHTML=''; }, 8000);
 }
 </script>
+
+<!-- CONTINGENCY MODAL -->
+<div id="contingency-modal" style="display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:28px;max-width:480px;width:100%">
+    <div style="font-size:28px;text-align:center;margin-bottom:12px">📋</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;
+      color:var(--navy);text-align:center;margin-bottom:16px">Plano B — Sem Internet</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:16px">
+      <strong>Opção 1 — Hotspot:</strong><br>
+      Peça para alguém com sinal melhor criar um <strong>ponto de acesso</strong>.
+      Conecte seu celular e o dos jogadores nele. Tente novamente.<br><br>
+      <strong>Opção 2 — Trocar operadora:</strong><br>
+      Se você usa Vivo, tente Tim ou Claro. Firebase funciona melhor em algumas.<br><br>
+      <strong>Opção 3 — Modo ao vivo sem app:</strong><br>
+      Projete as perguntas na tela, leia em voz alta e os jogadores levantam a mão.<br><br>
+      <strong>Opção 4 — WhatsApp:</strong><br>
+      Envie as perguntas pelo WhatsApp e colete respostas. Pontue manualmente.
+    </div>
+    <div style="background:#f0f9ff;border-radius:10px;padding:12px 16px;margin-bottom:16px;
+      font-size:12px;color:#0369a1">
+      💡 <strong>Dica para próximos eventos:</strong> Teste o Firebase na rede do local 
+      <strong>um dia antes</strong> do evento. Se bloquear, leve um roteador 4G próprio.
+    </div>
+    <button onclick="closeContingency()" style="width:100%;background:var(--navy);color:#fff;
+      border:none;border-radius:10px;padding:12px;font-family:'Oswald',sans-serif;
+      font-size:16px;font-weight:700;cursor:pointer">Fechar</button>
+  </div>
+</div>
 </body>
 </html>
