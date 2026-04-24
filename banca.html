@@ -300,6 +300,10 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
       <div class="form-hint">
         🏆 Responda rápido para ganhar pontos bônus!
       </div>
+      <div id="room-display" style="font-size:10px;color:var(--muted);
+        text-align:center;margin-top:6px">
+        Sala: aguardando...
+      </div>
     </div>
   </div>
 
@@ -319,6 +323,14 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <div class="wait-dot"></div>
     <div class="wait-dot"></div>
     <div class="wait-dot"></div>
+  </div>
+  <div id="wait-conn-status" style="margin-top:16px;font-size:11px;
+    color:rgba(255,255,255,.4);text-align:center">
+    🔗 Conectado ao Firebase
+  </div>
+  <div id="room-display" style="margin-top:6px;font-size:10px;
+    color:rgba(255,255,255,.25);text-align:center">
+    Sala: BANCA
   </div>
 </div>
 
@@ -605,28 +617,23 @@ function showLoader(on){
 }
 
 // ── GEOLOCATION → ROOM CODE ───────────────────────────────────
-const UF_MAP={'Acre':'AC','Alagoas':'AL','Amapá':'AP','Amazonas':'AM',
-  'Bahia':'BA','Ceará':'CE','Distrito Federal':'DF','Espírito Santo':'ES',
-  'Goiás':'GO','Maranhão':'MA','Mato Grosso':'MT','Mato Grosso do Sul':'MS',
-  'Minas Gerais':'MG','Pará':'PA','Paraíba':'PB','Paraná':'PR',
-  'Pernambuco':'PE','Piauí':'PI','Rio de Janeiro':'RJ',
-  'Rio Grande do Norte':'RN','Rio Grande do Sul':'RS','Rondônia':'RO',
-  'Roraima':'RR','Santa Catarina':'SC','São Paulo':'SP',
-  'Sergipe':'SE','Tocantins':'TO'};
+// Room code is synced from admin via Firebase
 
 function detectRoom(){
-  if(!navigator.geolocation){ return; }
-  navigator.geolocation.getCurrentPosition(
-    pos=>{
-      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=pt-BR`)
-        .then(r=>r.json())
-        .then(d=>{
-          const uf=UF_MAP[d.address?.state||'']||'BR';
-          ROOM_CODE='BANCA-'+uf;
-        }).catch(()=>{});
-    },
-    ()=>{}
-  );
+  // PRIMARY: always read active room from Firebase admin
+  // This ensures jogador and admin are always in the same room
+  db.ref('sipatmin/activeRoom').on('value', snap=>{
+    const room = snap.val();
+    if(room && typeof room === 'string' && room.length > 0){
+      ROOM_CODE = room;
+      updateRoomDisplay(room);
+    }
+  });
+}
+
+function updateRoomDisplay(room){
+  const el = document.getElementById('room-display');
+  if(el) el.textContent = 'Sala: ' + room;
 }
 
 
@@ -683,10 +690,67 @@ function showCountdown(cb){
   tick();
 }
 
+
+// ── FIREBASE CONNECTION MONITOR (JOGADOR) ────────────────────
+let _isConnected = false;
+let _connRetries = 0;
+let _connTimer = null;
+
+function initConnMonitor(){
+  db.ref('.info/connected').on('value', snap => {
+    _isConnected = snap.val() === true;
+    const bar = document.getElementById('conn-bar');
+    if(bar) bar.style.display = _isConnected ? 'none' : 'flex';
+    if(_isConnected){
+      _connRetries = 0;
+      clearTimeout(_connTimer);
+      const ws=document.getElementById('wait-conn-status');
+      if(ws) ws.innerHTML='🔗 Conectado ao Firebase';
+    } else {
+      _scheduleRetry();
+      const ws=document.getElementById('wait-conn-status');
+      if(ws) ws.innerHTML='⚠️ Sem conexão — tentando reconectar...';
+    }
+  });
+  // Show error after 10s if still not connected
+  _connTimer = setTimeout(()=>{
+    if(!_isConnected) showConnBanner();
+  }, 10000);
+}
+
+function showConnBanner(){
+  const bar = document.getElementById('conn-bar');
+  if(bar) bar.style.display = 'flex';
+}
+
+function _scheduleRetry(){
+  _connRetries++;
+  const delay = Math.min(3000 * _connRetries, 12000);
+  setTimeout(()=>{
+    if(!_isConnected){ db.goOffline(); setTimeout(()=>db.goOnline(), 500); }
+  }, delay);
+}
+
+function retryConn(){
+  _connRetries = 0;
+  const bar = document.getElementById('conn-bar');
+  const btn = document.getElementById('conn-retry-btn');
+  if(btn){ btn.textContent='Reconectando...'; btn.disabled=true; }
+  db.goOffline();
+  setTimeout(()=>{
+    db.goOnline();
+    setTimeout(()=>{
+      if(btn){ btn.textContent='↻ Tentar novamente'; btn.disabled=false; }
+    }, 4000);
+  }, 800);
+}
+
 // ── ENTER GAME ────────────────────────────────────────────────
 function enterGame(){
   // Unlock audio context on user gesture
   try{ _getCtx(); }catch(e){}
+  // Ensure Firebase is online
+  try{ db.goOnline(); }catch(e){}
   const n=document.getElementById('inp-name').value.trim();
   if(!n){
     document.getElementById('inp-name').style.borderColor='var(--red)';
@@ -953,6 +1017,7 @@ function playAgain(){
 
 // ── INIT ──────────────────────────────────────────────────────
 detectRoom();
+initConnMonitor();
 </script>
 </body>
 </html>
