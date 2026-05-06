@@ -627,19 +627,27 @@ function showLoader(on){
   }
 }
 
-// ── GEOLOCATION → ROOM CODE ───────────────────────────────────
-// Room code is synced from admin via Firebase
+// ── LEITURA DO PARÂMETRO ?sala= DA URL ────────────────────────
+// Quando o jogador escaneia o QR do admin, a URL já vem com ?sala=BANCA-PA
+// Isso elimina a necessidade de digitar o código manualmente
+// Se não houver parâmetro, o campo fica em branco e o jogador digita
 
 function detectRoom(){
-  // PRIMARY: always read active room from Firebase admin
-  // This ensures jogador and admin are always in the same room
-  db.ref('sipatmin/activeRoom').on('value', snap=>{
-    const room = snap.val();
-    if(room && typeof room === 'string' && room.length > 0){
-      ROOM_CODE = room;
-      updateRoomDisplay(room);
+  // Ler parâmetro ?sala= da URL atual
+  const params = new URLSearchParams(window.location.search);
+  const sala = params.get('sala');
+  if(sala && sala.trim().length > 0){
+    ROOM_CODE = sala.trim().toUpperCase();
+    // Auto-preencher o campo de código da sala
+    const inp = document.getElementById('inp-room');
+    if(inp){
+      inp.value = ROOM_CODE;
+      // Feedback visual: campo fica verde para indicar que foi preenchido automaticamente
+      inp.style.borderColor = 'var(--green, #1a9e5c)';
     }
-  });
+    updateRoomDisplay(ROOM_CODE);
+  }
+  // Se não há ?sala= na URL: campo fica vazio, jogador digita normalmente
 }
 
 function updateRoomDisplay(room){
@@ -1035,6 +1043,8 @@ function playAgain(){
 }
 
 // ── INIT ──────────────────────────────────────────────────────
+// detectRoom lê ?sala= da URL e preenche o campo automaticamente
+detectRoom();
 initConnMonitor();
 </script>
 </body>
