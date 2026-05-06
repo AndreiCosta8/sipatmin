@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
 :root{
   --navy:#0a1628;--navy2:#152240;--navy3:#1e2f50;
@@ -387,8 +387,20 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <!-- QR Code -->
     <div class="card qr-wrap">
       <div class="qr-lbl">Jogadores escaneiam aqui</div>
-      <!-- QR Code dinâmico — URL inclui ?sala= para auto-preenchimento no jogador -->
-      <div id="qr-canvas-wrap" style="width:200px;height:200px;margin:0 auto;border-radius:8px;overflow:hidden;background:#fff"></div>
+      <!-- QR Code dinâmico via quickchart.io — sem dependência de biblioteca -->
+      <img id="qr-img" src="" width="200" height="200"
+        style="border-radius:8px;display:block;margin:0 auto;background:#fff"
+        alt="QR Code da sala"/>
+      <script>
+        // Chamada imediata — não espera o Firebase inicializar
+        (function(){
+          var roomCode = 'BANCA';
+          var base = 'https://andreicosta8.github.io/sipatmin/banca';
+          var link = base + '?sala=' + encodeURIComponent(roomCode);
+          var qrUrl = 'https://quickchart.io/qr?text=' + encodeURIComponent(link) + '&size=200';
+          document.getElementById('qr-img').src = qrUrl;
+        })();
+      </script>
       <div style="margin-top:10px">
         <div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;
           text-transform:uppercase;margin-bottom:4px">Código da sala</div>
@@ -672,26 +684,15 @@ function updateRoomDisplay(){
   });
 }
 
-// ── GERAÇÃO DINÂMICA DO QR CODE ──────────────────────────────
-// Gera um QR que aponta para banca.html?sala=ROOM_CODE
-// Assim o jogador que escaneia já entra direto na sala certa
-let _qrObj = null;
+// ── GERAÇÃO DO QR CODE ────────────────────────────────────────
+// Usa quickchart.io — gera QR como imagem, sem biblioteca JS
+// Basta trocar o src da <img> quando a sala mudar
 function generateQR(roomCode){
-  var baseUrl = 'https://andreicosta8.github.io/sipatmin/banca';
-  var url = baseUrl + '?sala=' + encodeURIComponent(roomCode);
-  var wrap = document.getElementById('qr-canvas-wrap');
-  if(!wrap) return;
-  // Limpar QR anterior
-  wrap.innerHTML = '';
-  _qrObj = new QRCode(wrap, {
-    text: url,
-    width: 200,
-    height: 200,
-    colorDark: '#000000',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M
-  });
-  // Atualizar URL exibida abaixo do QR
+  var base = 'https://andreicosta8.github.io/sipatmin/banca';
+  var link = base + '?sala=' + encodeURIComponent(roomCode);
+  var qrUrl = 'https://quickchart.io/qr?text=' + encodeURIComponent(link) + '&size=200';
+  var img = document.getElementById('qr-img');
+  if(img) img.src = qrUrl;
   var urlEl = document.getElementById('qr-url-display');
   if(urlEl) urlEl.textContent = 'andreicosta8.github.io/sipatmin/banca?sala=' + roomCode;
 }
