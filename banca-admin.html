@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --navy:#0a1628;--navy2:#152240;--navy3:#1e2f50;
@@ -386,18 +387,23 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <!-- QR Code -->
     <div class="card qr-wrap">
       <div class="qr-lbl">Jogadores escaneiam aqui</div>
-      <img src="data:image/png;base64,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" width="200" height="200" alt="QR Banca"/>
+      <!-- QR Code dinâmico — URL inclui ?sala= para auto-preenchimento no jogador -->
+      <div id="qr-canvas-wrap" style="width:200px;height:200px;margin:0 auto;border-radius:8px;overflow:hidden;background:#fff"></div>
       <div style="margin-top:10px">
-    <div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;
-      text-transform:uppercase;margin-bottom:4px">Código da sala</div>
-    <div class="qr-room" id="qr-room-code" 
-      style="font-size:20px;letter-spacing:3px;cursor:pointer"
-      onclick="changeRoomCode()" title="Clique para trocar">BANCA</div>
-    <div style="font-size:9px;color:rgba(255,255,255,.25);margin-top:3px">
-      clique para trocar
-    </div>
-  </div>
-      <div class="qr-url">andreicosta8.github.io/sipatmin/banca</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;
+          text-transform:uppercase;margin-bottom:4px">Código da sala</div>
+        <div class="qr-room" id="qr-room-code"
+          style="font-size:20px;letter-spacing:3px;cursor:pointer"
+          onclick="changeRoomCode()" title="Clique para trocar">BANCA</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.25);margin-top:3px">
+          clique para trocar
+        </div>
+      </div>
+      <!-- URL com parâmetro ?sala= exibida abaixo do QR -->
+      <div style="font-size:9px;color:rgba(255,255,255,.3);text-align:center;
+        margin-top:6px;word-break:break-all;padding:0 4px" id="qr-url-display">
+        andreicosta8.github.io/sipatmin/banca?sala=BANCA
+      </div>
     </div>
 
     <!-- Controls -->
@@ -666,12 +672,38 @@ function updateRoomDisplay(){
   });
 }
 
+// ── GERAÇÃO DINÂMICA DO QR CODE ──────────────────────────────
+// Gera um QR que aponta para banca.html?sala=ROOM_CODE
+// Assim o jogador que escaneia já entra direto na sala certa
+let _qrObj = null;
+function generateQR(roomCode){
+  var baseUrl = 'https://andreicosta8.github.io/sipatmin/banca';
+  var url = baseUrl + '?sala=' + encodeURIComponent(roomCode);
+  var wrap = document.getElementById('qr-canvas-wrap');
+  if(!wrap) return;
+  // Limpar QR anterior
+  wrap.innerHTML = '';
+  _qrObj = new QRCode(wrap, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  // Atualizar URL exibida abaixo do QR
+  var urlEl = document.getElementById('qr-url-display');
+  if(urlEl) urlEl.textContent = 'andreicosta8.github.io/sipatmin/banca?sala=' + roomCode;
+}
+
 function changeRoomCode(){
   const novo = prompt('Digite o novo código da sala\n(jogadores deverão usar este código):', ROOM_CODE);
   if(!novo || !novo.trim()) return;
   ROOM_CODE = novo.trim().toUpperCase().replace(/\s+/g,'');
-  // Update display FIRST (works even offline)
+  // Atualiza displays de texto
   updateRoomDisplay();
+  // Regenera o QR com o novo ?sala=
+  generateQR(ROOM_CODE);
   // Then try Firebase (might fail locally - that's OK)
   try{
     db.ref().off();
@@ -680,7 +712,7 @@ function changeRoomCode(){
     listenRanking();
     initConnectionMonitor();
   }catch(e){ console.warn('Firebase offline - room code updated locally only'); }
-  alert('Sala alterada para: '+ROOM_CODE+'\n\nPeça para os jogadores usarem este código!');
+  alert('Sala alterada para: '+ROOM_CODE+'\n\nO QR Code foi atualizado — jogadores que escanear já entram direto!');
 }
 
 function updateConnUI(connected){
@@ -748,8 +780,9 @@ function forceReconnect(){
 
 window.addEventListener('load', ()=>{
   initConnectionMonitor();
-  // Publish active room so jogadores can sync automatically
-  db.ref('sipatmin/activeRoom').set(ROOM_CODE);
+  // Gera o QR Code inicial com o ROOM_CODE padrão
+  // (se admin trocar de sala, changeRoomCode() regenera automaticamente)
+  generateQR(ROOM_CODE);
   listenPlayers();
   listenRanking();
   // Reset any stale session
@@ -1233,22 +1266,6 @@ function finishGame(){
 
 
 // ── CHANGE ROOM CODE ──────────────────────────────────────────
-function changeRoom(){
-  const newRoom = prompt('Código da sala (ex: EVENTO2026):', ROOM_CODE);
-  if(!newRoom || !newRoom.trim()) return;
-  ROOM_CODE = newRoom.trim().toUpperCase();
-  ['lob-room-code','conn-room','qr-room-code'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.textContent = ROOM_CODE;
-  });
-  // Publish to Firebase so jogadores auto-sync
-  db.ref('sipatmin/activeRoom').set(ROOM_CODE);
-  // Reset listeners
-  db.ref('sipatmin/' + ROOM_CODE + '/session').set({active:false});
-  listenPlayers();
-  listenRanking();
-}
-
 // ── RESET ─────────────────────────────────────────────────────────
 function resetGame(){
   if(!confirm('Encerrar sessão e voltar ao lobby?')) return;
