@@ -316,15 +316,15 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
               <input class="qty-inp" id="qty-inp" type="number" 
                 min="1" max="12" value="12" 
                 onchange="clampQty()" oninput="clampQty()"/>
-              <span class="qty-max">/ 12</span>
+              <span class="qty-max">/ 30</span>
             </div>
             <button class="qty-btn" onclick="changeQty(1)">+</button>
           </div>
           <div class="qty-presets">
-            <button class="qty-preset" onclick="setQty(3)">Rápido (3)</button>
-            <button class="qty-preset" onclick="setQty(6)">Médio (6)</button>
-            <button class="qty-preset" onclick="setQty(9)">Longo (9)</button>
-            <button class="qty-preset" onclick="setQty(12)">Completo (12)</button>
+            <button class="qty-preset" onclick="setQty(5)">Rápido (5)</button>
+            <button class="qty-preset" onclick="setQty(10)">Médio (10)</button>
+            <button class="qty-preset" onclick="setQty(20)">Longo (20)</button>
+            <button class="qty-preset" onclick="setQty(30)">Completo (30)</button>
           </div>
         </div>
         <button class="btn btn-start" id="btn-start" onclick="startGame()" disabled>
@@ -613,6 +613,16 @@ const ALL_Q_MASTER=[
     {name:"Arctátil",sub:"Arco elétrico",ca:"CA 44548",img:"arctatil"},
     {name:"Max Defender",sub:"Corte severo",ca:"CA 41230",img:"maxDef"}]},
 
+  {tag:"⚙️ Proteção Mecânica",tc:"#1a56db",tbg:"#eff6ff",
+   q:"Técnico aperta parafusos em estrutura metálica com chave de torque — risco de esmagamento dos dedos. Qual luva?",
+   desc:"Dorso rígido com proteção de articulações + palmeira aderente EN 388. CA 43954.",
+   warn:"Luvas muito espessas prejudicam o controle da chave de torque — Total Power mantém equilíbrio proteção/destreza.",
+   correct:1,options:[
+    {name:"Max Solder",sub:"Alta temperatura",ca:"CA 41207",img:"maxSolder"},
+    {name:"Total Power",sub:"Impacto + Articulações",ca:"CA 43954",img:"total"},
+    {name:"Tyvek",sub:"Proteção química",ca:"—",img:"tyvek"},
+    {name:"Max Grip",sub:"Química + Corte leve",ca:"CA 42621",img:"maxGrip"}]},
+
   {tag:"🧪 Risco Químico",tc:"#7c3aed",tbg:"#f5f3ff",
    q:"Manuseio de produtos químicos perigosos — proteção total do corpo. Qual EPI?",
    desc:"Proteção contra aerossóis, respingos químicos, partículas. Uso único.",
@@ -621,6 +631,161 @@ const ALL_Q_MASTER=[
     {name:"Blusão Max Defender",sub:"Proteção mecânica",ca:"CA 44035",img:"blusaoDef"},
     {name:"Calça Max Solder",sub:"Proteção térmica",ca:"CA 50014",img:"calcaSolder"},
     {name:"Tyvek",sub:"Macacão químico integral",ca:"—",img:"tyvek"},
+    {name:"Calça c/ Peitoral MD",sub:"Corte · Pernas e tórax",ca:"CA 43923",img:"calcaPeitoral"}]},
+
+  // ── NOVAS PERGUNTAS — RISCO ELÉTRICO ────────────────────────────
+  {tag:"⚡ Risco Elétrico",tc:"#e8a800",tbg:"#fffbeb",
+   q:"Inspeção visual em painel elétrico energizado, sem contato — Nível 1. Qual proteção mínima?",
+   desc:"Arco Nível 1 · ATPV até 8 cal/cm². CA 41208.",
+   warn:"Mesmo sem toque, arco pode ocorrer. Nunca dispensar EPI em painéis energizados.",
+   correct:0,options:[
+    {name:"Clean Black",sub:"Arco Nível 1 · Destreza",ca:"CA 41208",img:"clean"},
+    {name:"Arctátil Cobertura",sub:"Arco Nível 4",ca:"CA 50674",img:"cobertura"},
+    {name:"Total Power",sub:"Proteção mecânica",ca:"CA 43954",img:"total"},
+    {name:"Max Solder",sub:"Alta temperatura",ca:"CA 41207",img:"maxSolder"}]},
+
+  {tag:"⚡ Risco Elétrico",tc:"#e8a800",tbg:"#fffbeb",
+   q:"Trabalho em cabines de média tensão com risco de arco Nível 3 — qual luva usar POR CIMA da isolante de borracha?",
+   desc:"ATPV 25 cal/cm² · usada como cobertura sobre luva de borracha classe 2. CA 44548.",
+   warn:"A Arctátil NÃO substitui a luva de borracha — ela protege do arco, não do choque elétrico.",
+   correct:1,options:[
+    {name:"Clean Black",sub:"Arco Nível 1",ca:"CA 41208",img:"clean"},
+    {name:"Arctátil",sub:"Arco Nível 3 · Cobertura",ca:"CA 44548",img:"arctatil"},
+    {name:"Max Grip",sub:"Química + Corte",ca:"CA 42621",img:"maxGrip"},
+    {name:"Grip Defender",sub:"Corte + Aderência",ca:"CA 41730",img:"gripDef"}]},
+
+  {tag:"⚡ Risco Elétrico",tc:"#e8a800",tbg:"#fffbeb",
+   q:"Eletricista troca fusíveis em cubículo de alta tensão — maior nível de arco disponível. Qual luva?",
+   desc:"ATPV 45 cal/cm² · HAF 94,13% · proteção máxima Nível 4. CA 50674.",
+   warn:"Obrigatório usar luva isolante de borracha por baixo. A cobertura não protege do choque.",
+   correct:3,options:[
+    {name:"Clean Black",sub:"Arco Nível 1",ca:"CA 41208",img:"clean"},
+    {name:"Arctátil",sub:"Arco Nível 3",ca:"CA 44548",img:"arctatil"},
+    {name:"Max Solder",sub:"Alta temperatura",ca:"CA 41207",img:"maxSolder"},
+    {name:"Arctátil Cobertura",sub:"Arco Nível 4 · ATPV 45",ca:"CA 50674",img:"cobertura"}]},
+
+  // ── NOVAS PERGUNTAS — RISCO DE CORTE ────────────────────────────
+  {tag:"✂️ Risco de Corte",tc:"#16a34a",tbg:"#dcfce7",
+   q:"Operador manuseia chapas metálicas com bordas afiadas na manutenção de estruturas. Qual luva?",
+   desc:"EN 388 – nível de corte F (máximo). Alta resistência a corte por contato. CA 43230.",
+   warn:"Master Cut Flex não protege contra impacto. Combine com proteção adicional se necessário.",
+   correct:2,options:[
+    {name:"Clean Black",sub:"Destreza",ca:"CA 41208",img:"clean"},
+    {name:"Max Grip",sub:"Química + Corte leve",ca:"CA 42621",img:"maxGrip"},
+    {name:"Master Cut Flex",sub:"Corte severo · EN 388 F",ca:"CA 43230",img:"masterCut"},
+    {name:"Total Power",sub:"Impacto + Corte médio",ca:"CA 43954",img:"total"}]},
+
+  {tag:"✂️ Risco de Corte",tc:"#16a34a",tbg:"#dcfce7",
+   q:"Trabalho com cabos de aço e fios metálicos — risco de corte por contato prolongado. Qual luva?",
+   desc:"EN 388 – corte nível D + resistência ao rasgo. CA 41730.",
+   warn:"Grip Defender tem excelente aderência mas não é indicada para produtos químicos.",
+   correct:0,options:[
+    {name:"Grip Defender",sub:"Corte D + Aderência",ca:"CA 41730",img:"gripDef"},
+    {name:"Max Solder",sub:"Alta temperatura",ca:"CA 41207",img:"maxSolder"},
+    {name:"Clean Black",sub:"Destreza leve",ca:"CA 41208",img:"clean"},
+    {name:"Arctátil",sub:"Arco elétrico",ca:"CA 44548",img:"arctatil"}]},
+
+  {tag:"✂️ Risco de Corte",tc:"#16a34a",tbg:"#dcfce7",
+   q:"Serviço de acabamento em peças metálicas com lixadeira angular — risco de corte + projeção de partículas. Qual luva?",
+   desc:"Proteção mecânica completa: impacto dorsal + corte EN 388 + resistência à abrasão. CA 43954.",
+   warn:"Total Power tem proteção dorsal contra impacto — diferencial para uso com ferramentas rotativas.",
+   correct:3,options:[
+    {name:"Master Cut Flex",sub:"Corte severo",ca:"CA 43230",img:"masterCut"},
+    {name:"Grip Defender",sub:"Corte + Aderência",ca:"CA 41730",img:"gripDef"},
+    {name:"Max Defender",sub:"Corte + Calor",ca:"CA 41230",img:"maxDef"},
+    {name:"Total Power",sub:"Impacto + Corte + Abrasão",ca:"CA 43954",img:"total"}]},
+
+  // ── NOVAS PERGUNTAS — ALTA TEMPERATURA ──────────────────────────
+  {tag:"🔥 Alta Temperatura",tc:"#d93025",tbg:"#fdf0ef",
+   q:"Soldador MIG em estruturas metálicas — respingo de solda + calor radiante. Qual luva?",
+   desc:"Raspa de couro + dorso em lona algodão. Proteção até 250°C contato. CA 41207.",
+   warn:"Max Solder não é indicada para corte com faca. Use a luva correta para cada risco.",
+   correct:1,options:[
+    {name:"Grip Defender",sub:"Corte + Aderência",ca:"CA 41730",img:"gripDef"},
+    {name:"Max Solder",sub:"Solda · Calor 250°C",ca:"CA 41207",img:"maxSolder"},
+    {name:"Total Power",sub:"Proteção mecânica",ca:"CA 43954",img:"total"},
+    {name:"Clean Black",sub:"Destreza",ca:"CA 41208",img:"clean"}]},
+
+  {tag:"🔥 Alta Temperatura",tc:"#d93025",tbg:"#fdf0ef",
+   q:"Troca de refratários em forno industrial — contato com superfícies acima de 300°C. Qual luva?",
+   desc:"Proteção prolongada em altas temperaturas. Raspa de couro reforçada. CA 41207.",
+   warn:"Nunca usar luvas sintéticas ou de borracha em contato com calor extremo — fundem e agravam queimaduras.",
+   correct:0,options:[
+    {name:"Max Solder",sub:"Calor prolongado · Reforçada",ca:"CA 41207",img:"maxSolder"},
+    {name:"Max Grip",sub:"Química + leve térmico",ca:"CA 42621",img:"maxGrip"},
+    {name:"Clean Black",sub:"Destreza",ca:"CA 41208",img:"clean"},
+    {name:"Master Cut Flex",sub:"Corte severo",ca:"CA 43230",img:"masterCut"}]},
+
+  {tag:"🔥 Alta Temperatura",tc:"#d93025",tbg:"#fdf0ef",
+   q:"Soldador precisa de precisão fina ao posicionar peças durante solda TIG. Qual é a melhor luva?",
+   desc:"Raspa de couro com corte mais fino — melhor destreza para solda TIG. CA 41207.",
+   warn:"Em solda TIG a destreza importa tanto quanto a proteção térmica.",
+   correct:2,options:[
+    {name:"Total Power",sub:"Impacto + Mecânica",ca:"CA 43954",img:"total"},
+    {name:"Arctátil Cobertura",sub:"Arco elétrico Nível 4",ca:"CA 50674",img:"cobertura"},
+    {name:"Max Solder",sub:"Solda · Alta destreza",ca:"CA 41207",img:"maxSolder"},
+    {name:"Max Defender",sub:"Corte + Calor 250°C",ca:"CA 41230",img:"maxDef"}]},
+
+  // ── NOVAS PERGUNTAS — PROTEÇÃO MECÂNICA ─────────────────────────
+  {tag:"⚙️ Proteção Mecânica",tc:"#1a56db",tbg:"#eff6ff",
+   q:"Mecânico faz desmontagem de equipamentos pesados com risco de impacto nos dedos. Qual luva?",
+   desc:"Proteção dorsal contra impacto + EN 388 corte C + abrasão. CA 43954.",
+   warn:"Total Power tem reforço dorsal rígido — diferencial para trabalhos com ferramentas de percussão.",
+   correct:1,options:[
+    {name:"Grip Defender",sub:"Corte + Aderência",ca:"CA 41730",img:"gripDef"},
+    {name:"Total Power",sub:"Impacto dorsal + EN 388",ca:"CA 43954",img:"total"},
+    {name:"Max Solder",sub:"Alta temperatura",ca:"CA 41207",img:"maxSolder"},
+    {name:"Clean Black",sub:"Destreza",ca:"CA 41208",img:"clean"}]},
+
+  {tag:"⚙️ Proteção Mecânica",tc:"#1a56db",tbg:"#eff6ff",
+   q:"Inspeção em espaço confinado — manipulação de tubulações e conexões com bordas vivas. Qual luva?",
+   desc:"EN 388 corte C + impacto + boa destreza para trabalho em espaço restrito. CA 43954.",
+   warn:"Em espaço confinado, destreza e toque são tão importantes quanto a proteção.",
+   correct:0,options:[
+    {name:"Total Power",sub:"Impacto + Corte + Destreza",ca:"CA 43954",img:"total"},
+    {name:"Arctátil Cobertura",sub:"Arco elétrico",ca:"CA 50674",img:"cobertura"},
+    {name:"Max Solder",sub:"Térmica",ca:"CA 41207",img:"maxSolder"},
+    {name:"Tyvek",sub:"Proteção química integral",ca:"—",img:"tyvek"}]},
+
+  {tag:"⚙️ Proteção Mecânica",tc:"#1a56db",tbg:"#eff6ff",
+   q:"Operação de britagem — vibração intensa e contato com pedras e equipamentos. Qual proteção para mãos e braços?",
+   desc:"Proteção mecânica completa: dorso rígido antiimpacto + palmeira reforçada EN 388. CA 43954.",
+   warn:"Vibração constante aumenta risco de lesão mesmo com luva. Alternar pausas é obrigatório.",
+   correct:3,options:[
+    {name:"Clean Black",sub:"Destreza leve",ca:"CA 41208",img:"clean"},
+    {name:"Max Grip",sub:"Química + leve mecânica",ca:"CA 42621",img:"maxGrip"},
+    {name:"Grip Defender",sub:"Corte + Aderência",ca:"CA 41730",img:"gripDef"},
+    {name:"Total Power",sub:"Impacto dorsal rígido",ca:"CA 43954",img:"total"}]},
+
+  // ── NOVAS PERGUNTAS — RISCO QUÍMICO ─────────────────────────────
+  {tag:"🧪 Risco Químico",tc:"#7c3aed",tbg:"#f5f3ff",
+   q:"Manutenção em bomba de recalque com contato a óleos lubrificantes e combustíveis. Qual luva?",
+   desc:"Química tipo A (EN 374) + mecânica EN 388 + térmica 250°C. CA 42621.",
+   warn:"Luvas de látex comuns NÃO garantem proteção adequada contra hidrocarbonetos.",
+   correct:2,options:[
+    {name:"Master Cut Flex",sub:"Corte severo",ca:"CA 43230",img:"masterCut"},
+    {name:"Total Power",sub:"Proteção mecânica",ca:"CA 43954",img:"total"},
+    {name:"Max Grip",sub:"Química A + EN 388",ca:"CA 42621",img:"maxGrip"},
+    {name:"Clean Black",sub:"Destreza",ca:"CA 41208",img:"clean"}]},
+
+  {tag:"🧪 Risco Químico",tc:"#7c3aed",tbg:"#f5f3ff",
+   q:"Aplicação de agentes de limpeza ácidos em pisos industriais — respingo nas mãos. Qual luva?",
+   desc:"Resistência química a ácidos (EN 374 tipo B) + resistência mecânica básica. CA 42621.",
+   warn:"Verificar sempre o boletim técnico da luva — nem toda luva 'química' protege contra ácidos fortes.",
+   correct:0,options:[
+    {name:"Max Grip",sub:"Química EN 374 · Ácidos",ca:"CA 42621",img:"maxGrip"},
+    {name:"Grip Defender",sub:"Corte + Aderência",ca:"CA 41730",img:"gripDef"},
+    {name:"Arctátil",sub:"Arco elétrico",ca:"CA 44548",img:"arctatil"},
+    {name:"Max Defender",sub:"Corte + Calor",ca:"CA 41230",img:"maxDef"}]},
+
+  {tag:"🧪 Risco Químico",tc:"#7c3aed",tbg:"#f5f3ff",
+   q:"Trabalhador aplica resinas epóxi em superfícies — risco de sensibilização química por contato. Qual EPI de corpo inteiro?",
+   desc:"Proteção contra respingos químicos e permeação de resinas. Uso único descartável.",
+   warn:"Sensibilização por epóxi é cumulativa — uma vez sensibilizado, qualquer exposição futura é perigosa.",
+   correct:1,options:[
+    {name:"Calça Max Solder",sub:"Proteção térmica",ca:"CA 50014",img:"calcaSolder"},
+    {name:"Tyvek",sub:"Barreira química integral",ca:"—",img:"tyvek"},
+    {name:"Blusão Max Defender",sub:"Proteção mecânica",ca:"CA 44035",img:"blusaoDef"},
     {name:"Calça c/ Peitoral MD",sub:"Corte · Pernas e tórax",ca:"CA 43923",img:"calcaPeitoral"}]}
 ];
 
@@ -982,7 +1147,7 @@ function setQty(n){
 function clampQty(){
   const inp = document.getElementById('qty-inp');
   if(!inp) return;
-  const v = Math.max(1, Math.min(12, parseInt(inp.value)||12));
+  const v = Math.max(1, Math.min(30, parseInt(inp.value)||12));
   inp.value = v;
   updateQtyPresets(v);
 }
