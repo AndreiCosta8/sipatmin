@@ -1061,9 +1061,9 @@ function startCountdown(secs, cb){
   function tick(){
     playCountdown(n);
     overlay.innerHTML = n > 0
-      ? \`<div style="font-family:Oswald,sans-serif;font-size:120px;font-weight:700;color:#fff;animation:cntPop .3s cubic-bezier(.17,.89,.32,1.28)">\${n}</div>
-         <div style="font-size:16px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px">Prepare-se!</div>\`
-      : \`<div style="font-family:Oswald,sans-serif;font-size:72px;font-weight:700;color:var(--gold);animation:cntPop .3s cubic-bezier(.17,.89,.32,1.28)">VAI!</div>\`;
+      ? `<div style="font-family:Oswald,sans-serif;font-size:120px;font-weight:700;color:#fff;animation:cntPop .3s cubic-bezier(.17,.89,.32,1.28)">\${n}</div>
+         <div style="font-size:16px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px">Prepare-se!</div>`
+      : `<div style="font-family:Oswald,sans-serif;font-size:72px;font-weight:700;color:var(--gold);animation:cntPop .3s cubic-bezier(.17,.89,.32,1.28)">VAI!</div>`;
     if(n > 0){ n--; setTimeout(tick, 1000); }
     else setTimeout(()=>{ overlay.style.display='none'; cb(); }, 600);
   }
