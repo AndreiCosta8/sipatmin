@@ -666,15 +666,15 @@ function showLoader(on){
 // Room code is synced from admin via Firebase
 
 function detectRoom(){
-  // PRIMARY: always read active room from Firebase admin
-  // This ensures jogador and admin are always in the same room
-  db.ref('sipatmin/activeRoom').on('value', snap=>{
-    const room = snap.val();
-    if(room && typeof room === 'string' && room.length > 0){
-      ROOM_CODE = room;
-      updateRoomDisplay(room);
-    }
-  });
+  const params = new URLSearchParams(window.location.search);
+  const sala = params.get('sala');
+  if(sala && sala.trim().length > 0){
+    ROOM_CODE = sala.trim().toUpperCase();
+    const inp = document.getElementById('inp-room');
+    if(inp){ inp.value = ROOM_CODE; inp.style.borderColor='#1a9e5c'; }
+    const el = document.getElementById('room-display');
+    if(el) el.textContent = 'Sala: ' + ROOM_CODE;
+  }
 }
 
 function updateRoomDisplay(room){
@@ -857,7 +857,6 @@ function enterGame(){
   });
   show('s-waiting');
   document.getElementById('wait-name').textContent='Olá, '+playerName+'! 👋';
-  showLoader(true);
   listenSession();
 }
 
@@ -1116,6 +1115,7 @@ function playAgain(){
 }
 
 // ── INIT ──────────────────────────────────────────────────────
+detectRoom();
 initConnMonitor();
 </script>
 </body>
