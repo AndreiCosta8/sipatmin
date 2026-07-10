@@ -869,6 +869,8 @@ function generateQR(roomCode){
 }
 // Chamada imediata — renderiza o SVG sem depender de Firebase nem eventos
 generateQR(ROOM_CODE);
+
+function changeRoomCode(){
   const novo = prompt('Digite o novo código da sala\n(jogadores deverão usar este código):', ROOM_CODE);
   if(!novo || !novo.trim()) return;
   ROOM_CODE = novo.trim().toUpperCase().replace(/\s+/g,'');
