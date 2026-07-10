@@ -151,6 +151,40 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 @keyframes confJ{0%{transform:translateY(0) rotate(0deg);opacity:1}
   90%{opacity:1}100%{transform:translateY(105vh) rotate(540deg);opacity:0}}
 
+/* ── ANIMAÇÕES ACERTO/ERRO ── */
+.opt.correct{border-color:var(--green);background:rgba(26,158,92,.12);
+  animation:pulseCorrect .5s cubic-bezier(.17,.89,.32,1.28)}
+.opt.wrong{border-color:#e8483a;background:rgba(232,72,58,.06);opacity:.7;
+  animation:shakeWrong .4s ease}
+@keyframes pulseCorrect{
+  0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes shakeWrong{
+  0%{transform:translateX(0)}20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}100%{transform:translateX(0)}}
+
+/* ── STREAK ─────────────── */
+.streak-badge{position:fixed;top:70px;right:14px;z-index:999;
+  background:linear-gradient(135deg,#ff6b00,#ffb300);
+  color:#fff;border-radius:20px;padding:6px 12px 6px 8px;
+  font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;
+  box-shadow:0 4px 16px rgba(255,100,0,.4);
+  display:flex;align-items:center;gap:4px;
+  transform:scale(0);transition:transform .3s cubic-bezier(.17,.89,.32,1.28)}
+.streak-badge.show{transform:scale(1)}
+.streak-badge.pop{animation:streakPop .4s cubic-bezier(.17,.89,.32,1.28)}
+@keyframes streakPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* ── SCORE FLY ───────────── */
+.score-fly{position:fixed;font-family:'Oswald',sans-serif;font-size:22px;
+  font-weight:700;color:var(--gold);pointer-events:none;z-index:9998;
+  text-shadow:0 2px 8px rgba(0,0,0,.3);
+  animation:scoreFly 1.4s ease forwards}
+@keyframes scoreFly{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  60%{opacity:1;transform:translateY(-60px) scale(1.2)}
+  100%{opacity:0;transform:translateY(-100px) scale(.8)}}
+
 /* ── LOADER ──────────────── */
 .loader{position:fixed;inset:0;z-index:9999;background:var(--bg);
   display:none;flex-direction:column;align-items:center;
@@ -375,6 +409,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 <!-- RESULT -->
 <div class="screen hidden" id="s-result">
   <div class="conf-wrap" id="conf-wrap"></div>
+  <div class="streak-badge" id="streak-badge">🔥 <span id="streak-num">2</span> seguidas!</div>
   <div class="res-trophy" id="res-trophy">🎖️</div>
   <div class="res-pos-lbl" id="res-pos-lbl">Sua posição</div>
   <div class="res-pos" id="res-pos">—</div>
@@ -400,13 +435,10 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
 <script>
 const firebaseConfig={
-  apiKey:"AIzaSyCizjgUCO2SXI6ozqjYmuj2LhJm1i0Rx28",
-  authDomain:"sipatmin-uniluvas-c0c3d.firebaseapp.com",
-  databaseURL:"https://sipatmin-uniluvas-c0c3d-default-rtdb.firebaseio.com",
-  projectId:"sipatmin-uniluvas-c0c3d",
-  storageBucket:"sipatmin-uniluvas-c0c3d.firebasestorage.app",
-  messagingSenderId:"764249882558",
-  appId:"1:764249882558:web:c10e3c0eb72f0b484183ef"
+  apiKey:"AIzaSyCJ44ZCiiLpN-EvS7KfTUWNRa4SrVnOH4w",
+  authDomain:"pedidos-vale.firebaseapp.com",
+  databaseURL:"https://pedidos-vale-default-rtdb.firebaseio.com",
+  projectId:"pedidos-vale"
 };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
@@ -630,27 +662,19 @@ function showLoader(on){
   }
 }
 
-// ── LEITURA DO PARÂMETRO ?sala= DA URL ────────────────────────
-// Quando o jogador escaneia o QR do admin, a URL já vem com ?sala=BANCA-PA
-// Isso elimina a necessidade de digitar o código manualmente
-// Se não houver parâmetro, o campo fica em branco e o jogador digita
+// ── GEOLOCATION → ROOM CODE ───────────────────────────────────
+// Room code is synced from admin via Firebase
 
 function detectRoom(){
-  // Ler parâmetro ?sala= da URL atual
-  const params = new URLSearchParams(window.location.search);
-  const sala = params.get('sala');
-  if(sala && sala.trim().length > 0){
-    ROOM_CODE = sala.trim().toUpperCase();
-    // Auto-preencher o campo de código da sala
-    const inp = document.getElementById('inp-room');
-    if(inp){
-      inp.value = ROOM_CODE;
-      // Feedback visual: campo fica verde para indicar que foi preenchido automaticamente
-      inp.style.borderColor = 'var(--green, #1a9e5c)';
+  // PRIMARY: always read active room from Firebase admin
+  // This ensures jogador and admin are always in the same room
+  db.ref('sipatmin/activeRoom').on('value', snap=>{
+    const room = snap.val();
+    if(room && typeof room === 'string' && room.length > 0){
+      ROOM_CODE = room;
+      updateRoomDisplay(room);
     }
-    updateRoomDisplay(ROOM_CODE);
-  }
-  // Se não há ?sala= na URL: campo fica vazio, jogador digita normalmente
+  });
 }
 
 function updateRoomDisplay(room){
@@ -685,6 +709,45 @@ function sndCorrect(){ _tone(523,.1,'triangle',.25,0);_tone(659,.1,'triangle',.2
 function sndWrong(){ _tone(280,.15,'sawtooth',.2,0);_tone(200,.3,'sawtooth',.15,.12); }
 function sndCountdown(n){ _tone(n===0?880:440,.1,'square',.15); }
 function sndTick(){ _tone(600,.04,'square',.08); }
+function sndStreak(n){
+  const freqs = n>=5?[523,659,784,1047,1319]:n>=3?[523,784,1047]:[659,1047];
+  freqs.forEach((f,i)=>_tone(f,.15,'triangle',.3,i*.09));
+}
+function sndWinner(){
+  [523,659,784,523,659,784,1047].forEach((f,i)=>_tone(f,.18,'triangle',.28,i*.13));
+}
+
+// ── STREAK ────────────────────────────────────────────────────
+let streak = 0;
+function updateStreak(acertou){
+  if(acertou){
+    streak++;
+    if(streak>=2){
+      const badge=document.getElementById('streak-badge');
+      document.getElementById('streak-num').textContent=streak;
+      badge.classList.add('show');
+      badge.classList.remove('pop');
+      void badge.offsetWidth;
+      badge.classList.add('pop');
+      sndStreak(streak);
+    }
+  } else {
+    streak=0;
+    const badge=document.getElementById('streak-badge');
+    if(badge) badge.classList.remove('show');
+  }
+}
+
+// ── SCORE FLY ─────────────────────────────────────────────────
+function showScoreFly(pts){
+  const el=document.createElement('div');
+  el.className='score-fly';
+  el.textContent='+'+pts;
+  el.style.left=(30+Math.random()*40)+'%';
+  el.style.top='42%';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
 
 // ── COUNTDOWN FOR JOGADOR ─────────────────────────────────────
 function showCountdown(cb){
@@ -959,14 +1022,18 @@ function showReveal(correctIdx){
     document.getElementById('score-num').textContent=myScore;
     fb.className='feedback ok';
     fb.textContent='✓ Correto! +'+pts+' pontos'+(myBonus>60?' ⚡ Resposta rápida!':'');
+    showScoreFly(pts);
+    updateStreak(true);
   } else if(myChoice>=0){
     sndWrong();
     fb.className='feedback ko';
     fb.textContent='✗ Errou! A correta está destacada em verde.';
+    updateStreak(false);
   } else {
     sndWrong();
     fb.className='feedback ko';
     fb.textContent='⏱ Tempo esgotado! A correta está em verde.';
+    updateStreak(false);
   }
   
   // Update score in Firebase using transaction to avoid race conditions
@@ -995,14 +1062,17 @@ function showResult(){
     document.getElementById('res-sub').textContent=myPos+'º de '+list.length+' jogadores';
     
     document.getElementById('final-rank').innerHTML=list.slice(0,6).map((p,i)=>
-      `<div class="rank-row ${p.me?'me':''}">
+      `<div class="rank-row ${p.me?'me':''}" style="animation:posSlide .4s ${i*.08}s both">
         <span class="rank-medal">${medals[i]||i+1+'º'}</span>
         <span class="rank-name">${p.name}</span>
         <span class="rank-pts">${p.score}</span>
       </div>`
     ).join('');
     
-    if(myPos===1) setTimeout(launchConfetti,300);
+    if(myPos<=3){
+      setTimeout(launchConfetti, 300);
+      setTimeout(sndWinner, 200);
+    }
   });
   // Clean up listener
   db.ref('sipatmin/'+ROOM_CODE+'/currentQuestion').off();
@@ -1046,8 +1116,6 @@ function playAgain(){
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-// detectRoom lê ?sala= da URL e preenche o campo automaticamente
-detectRoom();
 initConnMonitor();
 </script>
 </body>
