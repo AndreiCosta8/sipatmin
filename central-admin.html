@@ -87,10 +87,10 @@ body{background:var(--bg);color:#1a2a4a;font-family:'Inter',sans-serif;min-heigh
           <div class="game-label">MEMÓRIA EPI</div>
           <div class="game-tag" id="tag-memoria">Disponível</div>
         </div>
-        <div class="game-btn soon">
+        <div class="game-btn" data-game="corrida" onclick="selecionarJogo('corrida')">
           <div class="game-icon">⚡</div>
           <div class="game-label">CORRIDA EPI</div>
-          <div class="game-tag">Em breve</div>
+          <div class="game-tag" id="tag-corrida">Disponível</div>
         </div>
         <div class="game-btn soon">
           <div class="game-icon">📸</div>
@@ -155,7 +155,8 @@ const QRS = {
 
 const JOGOS = {
   quiz:    { nome:'Quiz EPI', icon:'❓' },
-  memoria: { nome:'Memória EPI', icon:'🃏' }
+  memoria: { nome:'Memória EPI', icon:'🃏' },
+  corrida: { nome:'Corrida EPI', icon:'⚡' }
 };
 
 let ROOM_CODE = 'SIPAT-PA';
@@ -286,8 +287,12 @@ function darLargada(){
     updates['sipatmin/'+ROOM_CODE+'/players/'+uid+'/finished'] = false;
     updates['sipatmin/'+ROOM_CODE+'/players/'+uid+'/time'] = 0;
     updates['sipatmin/'+ROOM_CODE+'/players/'+uid+'/erros'] = 0;
+    updates['sipatmin/'+ROOM_CODE+'/players/'+uid+'/acertos'] = 0;
   });
   db.ref().update(updates);
+
+  // Limpar respostas da rodada anterior (Corrida usa isso para o pódio)
+  db.ref('sipatmin/'+ROOM_CODE+'/answers').remove();
 
   // 1) Definir o jogo ativo — celulares redirecionam
   db.ref('sipatmin/'+ROOM_CODE+'/activeGame').set(jogoSelecionado);
