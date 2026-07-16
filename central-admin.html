@@ -92,10 +92,10 @@ body{background:var(--bg);color:#1a2a4a;font-family:'Inter',sans-serif;min-heigh
           <div class="game-label">CORRIDA EPI</div>
           <div class="game-tag" id="tag-corrida">Disponível</div>
         </div>
-        <div class="game-btn soon">
-          <div class="game-icon">📸</div>
-          <div class="game-label">QUIZ IMAGEM</div>
-          <div class="game-tag">Em breve</div>
+        <div class="game-btn" data-game="erros" onclick="selecionarJogo('erros')">
+          <div class="game-icon">🔍</div>
+          <div class="game-label">ACHE O ERRO</div>
+          <div class="game-tag" id="tag-erros">Disponível</div>
         </div>
       </div>
     </div>
@@ -156,7 +156,8 @@ const QRS = {
 const JOGOS = {
   quiz:    { nome:'Quiz EPI', icon:'❓' },
   memoria: { nome:'Memória EPI', icon:'🃏' },
-  corrida: { nome:'Corrida EPI', icon:'⚡' }
+  corrida: { nome:'Corrida EPI', icon:'⚡' },
+  erros:   { nome:'Ache o Erro', icon:'🔍' }
 };
 
 let ROOM_CODE = 'SIPAT-PA';
