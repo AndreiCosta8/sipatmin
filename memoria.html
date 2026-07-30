@@ -308,14 +308,20 @@ function finishGame(){
   const fp=Math.max(0,score-elapsedSecs*2);score=fp;updateScore();
   db.ref("sipatmin/"+ROOM_CODE+"/players/"+uid).update({score:fp,time:elapsedSecs,erros:erros,finished:true});
   setTimeout(()=>{
-    show("s-result");
-    document.getElementById("res-trophy").textContent=erros===0?"🏆":matched.length>=6?"🥈":"🎖";
-    document.getElementById("res-title").textContent=erros===0?"Perfeito! Zero erros!":"Muito bem, "+playerName+"!";
-    const m=Math.floor(elapsedSecs/60),s=String(elapsedSecs%60).padStart(2,"0");
-    document.getElementById("res-time").textContent=m+"m"+s+"s";
-    document.getElementById("res-erros").textContent=erros;
-    document.getElementById("res-pts").textContent=fp;
-    if(fp>400)launchConfetti();sndWin();
+    db.ref("sipatmin/"+ROOM_CODE+"/players").once("value",snap=>{
+      const pl=snap.val()||{};
+      const list=Object.values(pl).filter(p=>p.finished).sort((a,b)=>(b.score||0)-(a.score||0));
+      const pos=list.findIndex(p=>p.name===playerName)+1;
+      const medals=["🥇","🥈","🥉"];
+      show("s-result");
+      document.getElementById("res-trophy").textContent=(pos>=1&&pos<=3)?medals[pos-1]:"🎖";
+      document.getElementById("res-title").textContent=erros===0?"Perfeito! Zero erros!":(pos===1?"Você venceu, "+playerName+"!":"Muito bem, "+playerName+"!");
+      const m=Math.floor(elapsedSecs/60),s=String(elapsedSecs%60).padStart(2,"0");
+      document.getElementById("res-time").textContent=m+"m"+s+"s";
+      document.getElementById("res-erros").textContent=erros;
+      document.getElementById("res-pts").textContent=fp;
+      if(pos>=1&&pos<=3)launchConfetti();sndWin();
+    });
   },600);
 }
 function showRanking(){

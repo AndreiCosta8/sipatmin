@@ -798,7 +798,7 @@ function fim(){
   db.ref(path('players/' + uid)).update({ score: score, acertos: acertos, finished: true });
   db.ref(path('players')).once('value').then(snap => {
     const pl = snap.val() || {};
-    const lista = Object.values(pl).sort((a, b) => (b.score || 0) - (a.score || 0));
+    const lista = Object.values(pl).filter(p => p.finished).sort((a, b) => (b.score || 0) - (a.score || 0));
     const meuPos = lista.findIndex(p => p.name === playerName) + 1;
     const medal = ['&#129351;','&#129352;','&#129353;'];
     document.getElementById('res-trophy').innerHTML = meuPos <= 3 && meuPos > 0 ? medal[meuPos - 1] : '&#127894;';
