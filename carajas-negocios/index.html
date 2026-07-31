@@ -153,6 +153,11 @@
     margin-top:18px; background:transparent; border:1px solid var(--navy-700); color:var(--paper-100);
     padding:10px 18px; border-radius:10px; font-family:'Inter',sans-serif; font-size:13px; cursor:pointer;
   }
+  .painel-link{
+    display:block; width:fit-content; margin:14px auto 0; font-size:11px; letter-spacing:.03em;
+    color:var(--paper-300); text-decoration:none; opacity:.5; transition:opacity .15s ease, color .15s ease;
+  }
+  .painel-link:hover{opacity:1; color:var(--gold-300);}
   .print-btn:hover{border-color:var(--gold-500);}
 
   /* ---------- DASHBOARD VIEW ---------- */
@@ -207,7 +212,7 @@
 
   @media print{
     body{background:#fff !important; color:#000 !important;}
-    .eyebrow, .qr-caption, .print-btn, .counter-box, .ticker-box{display:none !important;}
+    .eyebrow, .qr-caption, .print-btn, .painel-link, .counter-box, .ticker-box{display:none !important;}
     .qr-frame{background:#fff; box-shadow:none;}
   }
   @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important;} }
@@ -218,6 +223,29 @@
   .consent-row label{margin:0; text-transform:none; letter-spacing:normal; font-weight:400; font-size:12.5px; color:var(--paper-300); line-height:1.45;}
   .logout-btn{background:transparent; border:1px solid var(--navy-700); color:var(--paper-300); padding:10px 16px; border-radius:10px; font-family:'Inter',sans-serif; font-size:13px; cursor:pointer; white-space:nowrap;}
   .logout-btn:hover{border-color:var(--danger-500); color:#F1B4A9;}
+
+  /* ---------- AÇÕES NA TABELA (editar / excluir) ---------- */
+  .col-acoes{white-space:nowrap; text-align:right;}
+  .row-btn{background:transparent; border:1px solid var(--navy-700); color:var(--paper-300); padding:6px 12px; border-radius:8px; font-family:'Inter',sans-serif; font-size:12px; cursor:pointer; transition:border-color .15s ease, color .15s ease;}
+  .row-btn + .row-btn{margin-left:8px;}
+  .row-btn.edit:hover{border-color:var(--gold-500); color:var(--gold-300);}
+  .row-btn.del:hover{border-color:var(--danger-500); color:#F1B4A9;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(4,10,18,.72); display:flex; align-items:center; justify-content:center; padding:24px; z-index:50;}
+  .modal-card{width:100%; max-width:420px; background:linear-gradient(180deg, var(--navy-800), var(--navy-900)); border:1px solid var(--navy-700); border-radius:14px; padding:26px 24px;}
+  .modal-card h3{font-family:'Oswald',sans-serif; font-size:18px; font-weight:600; margin:0 0 4px; color:var(--paper-100);}
+  .modal-card .modal-sub{font-size:13px; color:var(--paper-300); margin:0 0 18px; line-height:1.45;}
+  .modal-card label{margin-top:14px;}
+  .modal-error{font-size:12px; color:var(--danger-500); min-height:14px; margin-top:8px;}
+  .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:22px;}
+  .modal-btn{padding:11px 18px; border-radius:10px; font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:13px; cursor:pointer; border:1px solid var(--navy-700); background:transparent; color:var(--paper-100);}
+  .modal-btn.ghost:hover{border-color:var(--gold-500);}
+  .modal-btn.primary{background:var(--gold-500); color:var(--navy-950); border:none;}
+  .modal-btn.primary:hover{background:var(--gold-300);}
+  .modal-btn.primary:disabled{opacity:.55; cursor:not-allowed;}
+  .modal-btn.danger{background:var(--danger-500); color:#fff; border:none;}
+  .modal-btn.danger:hover{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -301,6 +329,7 @@
       <div class="qr-frame"><div id="qrcode"></div></div>
       <div class="qr-caption">Uniluvas · Feira Carajás Negócios · Parauapebas 2026</div>
       <button class="print-btn" onclick="window.print()">Imprimir QR</button>
+      <a href="?view=dashboard" class="painel-link">🔒 Acessar painel</a>
     </div>
   </div>
 </div>
@@ -350,10 +379,42 @@
 
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Nome</th><th>Empresa</th><th>Telefone</th><th>Data / Hora</th></tr></thead>
+        <thead><tr><th>Nome</th><th>Empresa</th><th>Telefone</th><th>Data / Hora</th><th class="col-acoes">Ações</th></tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
       <div class="empty-state" id="emptyState" style="display:none;">Nenhum cadastro encontrado ainda.</div>
+    </div>
+  </div>
+
+  <!-- Modal de edição -->
+  <div class="modal-overlay" id="editModal" style="display:none;">
+    <div class="modal-card">
+      <h3>Editar cadastro</h3>
+      <p class="modal-sub">Ajuste os dados e salve. As alterações aparecem na hora.</p>
+      <label for="editNome">Nome</label>
+      <input type="text" id="editNome" placeholder="Nome completo">
+      <label for="editEmpresa">Empresa</label>
+      <input type="text" id="editEmpresa" placeholder="Empresa">
+      <label for="editTelefone">Telefone</label>
+      <input type="tel" id="editTelefone" placeholder="(94) 99999-9999" inputmode="numeric">
+      <div class="modal-error" id="editError"></div>
+      <div class="modal-actions">
+        <button class="modal-btn ghost" id="editCancel">Cancelar</button>
+        <button class="modal-btn primary" id="editSave">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmação de exclusão -->
+  <div class="modal-overlay" id="delModal" style="display:none;">
+    <div class="modal-card">
+      <h3>Excluir cadastro</h3>
+      <p class="modal-sub" id="delMsg">Tem certeza? Esta ação não pode ser desfeita.</p>
+      <div class="modal-error" id="delError"></div>
+      <div class="modal-actions">
+        <button class="modal-btn ghost" id="delCancel">Cancelar</button>
+        <button class="modal-btn danger" id="delConfirm">Excluir</button>
+      </div>
     </div>
   </div>
 </div>
@@ -586,6 +647,10 @@
           <td>${escapeHtml(l.empresa)}</td>
           <td>${escapeHtml(l.telefone)}</td>
           <td class="col-data">${formatDate(l.criadoEm)}</td>
+          <td class="col-acoes">
+            <button class="row-btn edit" data-action="edit" data-id="${escapeHtml(l.id)}">Editar</button>
+            <button class="row-btn del" data-action="del" data-id="${escapeHtml(l.id)}">Excluir</button>
+          </td>
         </tr>`).join('');
     }
     function applyFilter(){
@@ -595,6 +660,111 @@
       renderTable(filtered);
     }
     document.getElementById('searchInput').addEventListener('input', applyFilter);
+
+    // ---------------------------------------------------------------
+    // Editar / Excluir cadastro
+    // ---------------------------------------------------------------
+    // Mesmas normalizações do formulário, para manter os dados consistentes
+    function normalizeCompany(v){ return v.trim().replace(/\s+/g, ' ').toUpperCase(); }
+    function formatPhone(value){
+      let v = value.replace(/\D/g, '').slice(0, 11);
+      if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      else if (v.length > 0) v = v.replace(/(\d{0,2})/, '($1');
+      return v.trim();
+    }
+
+    const editModal = document.getElementById('editModal');
+    const editNome = document.getElementById('editNome');
+    const editEmpresa = document.getElementById('editEmpresa');
+    const editTelefone = document.getElementById('editTelefone');
+    const editError = document.getElementById('editError');
+    const editSave = document.getElementById('editSave');
+    const delModal = document.getElementById('delModal');
+    const delMsg = document.getElementById('delMsg');
+    const delError = document.getElementById('delError');
+    const delConfirm = document.getElementById('delConfirm');
+    let editingId = null;
+    let deletingId = null;
+
+    editTelefone.addEventListener('input', (e) => { e.target.value = formatPhone(e.target.value); });
+
+    // Clique nos botões da tabela (delegação: a tabela é redesenhada a cada atualização)
+    document.getElementById('tableBody').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      const lead = allLeads.find(l => l.id === id);
+      if (!lead) return;
+      if (btn.getAttribute('data-action') === 'edit'){
+        editingId = id;
+        editNome.value = lead.nome || '';
+        editEmpresa.value = lead.empresa || '';
+        editTelefone.value = lead.telefone || '';
+        editError.textContent = '';
+        editModal.style.display = 'flex';
+        editNome.focus();
+      } else {
+        deletingId = id;
+        delMsg.textContent = `Excluir o cadastro de "${lead.nome || 'sem nome'}" (${lead.empresa || '—'})? Esta ação não pode ser desfeita.`;
+        delError.textContent = '';
+        delModal.style.display = 'flex';
+      }
+    });
+
+    function closeEdit(){ editModal.style.display = 'none'; editingId = null; }
+    function closeDel(){ delModal.style.display = 'none'; deletingId = null; }
+    document.getElementById('editCancel').addEventListener('click', closeEdit);
+    document.getElementById('delCancel').addEventListener('click', closeDel);
+    // Clicar fora do card (no fundo escuro) também fecha
+    editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEdit(); });
+    delModal.addEventListener('click', (e) => { if (e.target === delModal) closeDel(); });
+
+    editSave.addEventListener('click', async () => {
+      const nome = editNome.value.trim();
+      const empresa = editEmpresa.value.trim();
+      const telefone = editTelefone.value.trim();
+      editError.textContent = '';
+      if (nome.length < 2){ editError.textContent = 'Digite o nome completo.'; return; }
+      if (empresa.length < 2){ editError.textContent = 'Digite o nome da empresa.'; return; }
+      if (telefone.replace(/\D/g,'').length < 10){ editError.textContent = 'Telefone incompleto.'; return; }
+      if (!editingId) return;
+      editSave.disabled = true; editSave.textContent = 'Salvando...';
+      try {
+        await db.collection(COLLECTION_NAME).doc(editingId).update({
+          nome: nome,
+          empresa: normalizeCompany(empresa),
+          telefone: telefone
+        });
+        closeEdit(); // a tabela se atualiza sozinha pelo listener em tempo real
+      } catch (err){
+        console.error(err);
+        editError.textContent = 'Não foi possível salvar. Verifique a conexão.';
+      } finally {
+        editSave.disabled = false; editSave.textContent = 'Salvar';
+      }
+    });
+
+    delConfirm.addEventListener('click', async () => {
+      if (!deletingId) return;
+      delError.textContent = '';
+      delConfirm.disabled = true; delConfirm.textContent = 'Excluindo...';
+      try {
+        await db.collection(COLLECTION_NAME).doc(deletingId).delete();
+        closeDel(); // atualização em tempo real remove a linha
+      } catch (err){
+        console.error(err);
+        delError.textContent = 'Não foi possível excluir. Verifique a conexão.';
+      } finally {
+        delConfirm.disabled = false; delConfirm.textContent = 'Excluir';
+      }
+    });
+
+    // Tecla Esc fecha qualquer modal aberto
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape'){ if (editModal.style.display === 'flex') closeEdit(); if (delModal.style.display === 'flex') closeDel(); }
+    });
 
     // Gráfico: cadastros por empresa (top 8 + "Outros")
     let companyChartInstance = null;
@@ -644,7 +814,7 @@
     function startDashboardData(){
       if (unsubData) return;
       unsubData = db.collection(COLLECTION_NAME).orderBy('criadoEm', 'desc').onSnapshot((snapshot) => {
-        allLeads = snapshot.docs.map(doc => doc.data());
+        allLeads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         applyFilter();
         renderCharts(allLeads);
       }, (err) => {
